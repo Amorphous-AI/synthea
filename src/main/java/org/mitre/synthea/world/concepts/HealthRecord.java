@@ -26,6 +26,7 @@ import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
 import org.mitre.synthea.export.JSONSkip;
+import org.mitre.synthea.helpers.Config;
 import org.mitre.synthea.helpers.RandomNumberGenerator;
 import org.mitre.synthea.helpers.Utilities;
 import org.mitre.synthea.modules.EncounterModule;
@@ -1122,10 +1123,15 @@ public class HealthRecord implements Serializable {
   public Encounter currentEncounter(long time) {
     Encounter encounter = null;
     if (encounters.size() == 0) {
-      encounter = EncounterModule.createEncounter(person, time, EncounterType.WELLNESS,
-          ClinicianSpecialty.GENERAL_PRACTICE,
-          EncounterModule.WELL_CHILD_VISIT, EncounterModule.NAME);
-      encounter.name = "First Wellness";
+      boolean disableWellness = Boolean.parseBoolean(
+          Config.get("generate.disable_wellness_encounters", "false"));
+      EncounterType firstType = disableWellness
+          ? EncounterType.AMBULATORY : EncounterType.WELLNESS;
+      Code firstCode = disableWellness
+          ? EncounterModule.GENERAL_EXAM : EncounterModule.WELL_CHILD_VISIT;
+      encounter = EncounterModule.createEncounter(person, time, firstType,
+          ClinicianSpecialty.GENERAL_PRACTICE, firstCode, EncounterModule.NAME);
+      encounter.name = disableWellness ? "First Encounter" : "First Wellness";
     }
     for (int i = encounters.size() - 1; i >= 0; i--) {
       encounter = encounters.get(i);

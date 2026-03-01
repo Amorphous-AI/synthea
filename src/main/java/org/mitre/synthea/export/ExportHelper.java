@@ -16,6 +16,7 @@ import org.apache.commons.lang3.time.FastDateFormat;
 import org.hl7.fhir.dstu3.model.Condition;
 import org.mitre.synthea.engine.Components.Attachment;
 import org.mitre.synthea.engine.Components.SampledData;
+import org.mitre.synthea.helpers.Config;
 import org.mitre.synthea.helpers.TimeSeriesData;
 import org.mitre.synthea.world.agents.Clinician;
 import org.mitre.synthea.world.agents.Person;
@@ -169,6 +170,16 @@ public abstract class ExportHelper {
    */
   private static final FastDateFormat ISO_DATE_FORMAT = iso();
 
+  private static volatile Boolean preciseTiming = null;
+
+  private static boolean isPreciseTiming() {
+    if (preciseTiming == null) {
+      preciseTiming = Boolean.parseBoolean(
+          Config.get("exporter.csv.precise_timing", "false"));
+    }
+    return preciseTiming;
+  }
+
   /**
    * Create a FastDateFormat for iso8601.
    * @return Iso8601 date time format.
@@ -180,9 +191,14 @@ public abstract class ExportHelper {
   }
 
   /**
-   * Get a date string in the format YYYY-MM-DD from the given time stamp.
+   * Get a date string from the given time stamp.
+   * When exporter.csv.precise_timing is true, returns ISO 8601 with seconds.
+   * Otherwise returns YYYY-MM-DD.
    */
   public static String dateFromTimestamp(long time) {
+    if (isPreciseTiming()) {
+      return ISO_DATE_FORMAT.format(new Date(time));
+    }
     return DATE_FORMAT.format(new Date(time));
   }
 

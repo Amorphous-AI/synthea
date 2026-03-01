@@ -7,6 +7,7 @@ import java.util.Map;
 import org.mitre.synthea.engine.Module;
 import org.mitre.synthea.helpers.Attributes;
 import org.mitre.synthea.helpers.Attributes.Inventory;
+import org.mitre.synthea.helpers.Config;
 import org.mitre.synthea.helpers.Utilities;
 import org.mitre.synthea.world.agents.Person;
 import org.mitre.synthea.world.agents.Provider;
@@ -93,15 +94,20 @@ public final class EncounterModule extends Module {
       return true;
     }
     if (person.hasCurrentEncounter()) {
-      // Don't start a new encounter here if there is already an active encounter
       return false;
     }
+
+    boolean disableWellness = Boolean.parseBoolean(
+        Config.get("generate.disable_wellness_encounters", "false"));
+    boolean disableImmunizations = Boolean.parseBoolean(
+        Config.get("generate.disable_immunizations", "false"));
+
     boolean startedEncounter = false;
     Encounter encounter = null;
 
-    // add a wellness encounter if this is the right time
-    if (person.record.timeSinceLastWellnessEncounter(time)
-        >= recommendedTimeBetweenWellnessVisits(person, time)) {
+    if (!disableWellness
+        && person.record.timeSinceLastWellnessEncounter(time)
+            >= recommendedTimeBetweenWellnessVisits(person, time)) {
       Code code = getWellnessVisitCode(person, time);
       encounter = createEncounter(person, time, EncounterType.WELLNESS,
           ClinicianSpecialty.GENERAL_PRACTICE, code, name);
@@ -149,7 +155,7 @@ public final class EncounterModule extends Module {
       }
     }
 
-    if (startedEncounter) {
+    if (startedEncounter && !disableImmunizations) {
       Immunizations.performEncounter(person, time);
     }
 

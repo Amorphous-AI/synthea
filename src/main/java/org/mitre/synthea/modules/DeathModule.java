@@ -6,6 +6,7 @@ import java.util.Map;
 
 import org.mitre.synthea.helpers.Attributes;
 import org.mitre.synthea.helpers.Attributes.Inventory;
+import org.mitre.synthea.helpers.Config;
 import org.mitre.synthea.world.agents.Person;
 import org.mitre.synthea.world.concepts.ClinicianSpecialty;
 import org.mitre.synthea.world.concepts.HealthRecord.Code;
@@ -48,8 +49,13 @@ public class DeathModule {
 
       Code causeOfDeath = (Code) person.attributes.get(Person.CAUSE_OF_DEATH);
 
+      boolean disableWellness = Boolean.parseBoolean(
+          Config.get("generate.disable_wellness_encounters", "false"));
+      EncounterType deathEncType = disableWellness
+          ? EncounterType.AMBULATORY : EncounterType.WELLNESS;
+
       person.releaseCurrentEncounter(time, "DeathModule");
-      Encounter encounter = EncounterModule.createEncounter(person, time, EncounterType.WELLNESS,
+      Encounter encounter = EncounterModule.createEncounter(person, time, deathEncType,
           ClinicianSpecialty.GENERAL_PRACTICE, DEATH_CERTIFICATION, "DeathModule");
       encounter.reason = causeOfDeath;
 
@@ -60,7 +66,7 @@ public class DeathModule {
       Report deathCert = person.record.report(time, DEATH_CERTIFICATE.code, 1);
       deathCert.codes.add(DEATH_CERTIFICATE);
 
-      person.record.encounterEnd(time, EncounterType.WELLNESS);
+      person.record.encounterEnd(time, deathEncType);
       // Do NOT release the DeathModule encounter, because no one should
       // be able to have an encounter after this one.
     }

@@ -34,6 +34,9 @@ import java.util.TreeMap;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
 
@@ -259,18 +262,30 @@ public class Module implements Cloneable, Serializable {
     return getModules(p -> true);
   }
 
+  private static final Set<String> NON_ESSENTIAL_CORE_MODULES = new HashSet<>(Arrays.asList(
+      "Cardiovascular Disease", "Quality Of Life", "Weight Loss", "COVID-19 Immunization Module"
+  ));
+
   /**
    * Get a list of top-level modules including core and submodules.
    * @param pathPredicate A predicate to filter a module based on path.
    * @return a list of top-level modules, only including core modules and those allowed by the
    *     supplied predicate. Submodules are loaded, but not included.
+   *     When generate.only_essential_core_modules is true, non-essential core modules
+   *     (CardiovascularDisease, QualityOfLife, WeightLoss, C19Immunization) are skipped.
    */
   public static List<Module> getModules(Predicate<String> pathPredicate) {
+    final boolean onlyEssential = Boolean.parseBoolean(
+        Config.get("generate.only_essential_core_modules", "false"));
     List<Module> list = new ArrayList<Module>();
     modules.forEach((k, v) -> {
       if (v.submodule) {
         v.get(); // ensure submodules get loaded
-      } else if (v.core || pathPredicate.test(v.path)) {
+      } else if (v.core) {
+        if (!onlyEssential || !NON_ESSENTIAL_CORE_MODULES.contains(k)) {
+          list.add(v.get());
+        }
+      } else if (pathPredicate.test(v.path)) {
         list.add(v.get());
       }
     });
