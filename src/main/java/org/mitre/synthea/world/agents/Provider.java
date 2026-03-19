@@ -607,7 +607,10 @@ public class Provider implements QuadTreeElement, Serializable {
 
         String emergency = row.remove("emergency");
         if ("Yes".equalsIgnoreCase(emergency) || "true".equalsIgnoreCase(emergency)) {
-          parsed.servicesProvided.add(EncounterType.EMERGENCY);
+          if (providerType == ProviderType.HOSPITAL || providerType == ProviderType.IHS
+              || providerType == ProviderType.VETERAN) {
+            parsed.servicesProvided.add(EncounterType.EMERGENCY);
+          }
         }
 
         // add any remaining columns we didn't explicitly map to first-class fields
