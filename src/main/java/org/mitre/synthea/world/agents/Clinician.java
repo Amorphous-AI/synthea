@@ -77,6 +77,14 @@ public class Clinician implements Serializable, QuadTreeElement {
   private int procedures;
   /** Seed for generating random values for the clinician. */
   public long populationSeed;
+  /** Practice-style attributes that influence clinical decisions in modules. */
+  private Map<String, Double> practiceAttributes = new ConcurrentHashMap<String, Double>();
+
+  public static final String PRACTICE_CESAREAN_PROPENSITY = "cesarean_propensity";
+  public static final String PRACTICE_REHAB_REFERRAL_PROPENSITY = "rehab_referral_propensity";
+  public static final String PRACTICE_ANTIBIOTIC_PROPENSITY = "antibiotic_propensity";
+  public static final String PRACTICE_CKD_SCREENING_PROPENSITY = "ckd_screening_propensity";
+  public static final String PRACTICE_STATIN_PROPENSITY = "statin_prescribing_propensity";
 
   /**
    * Create a new clinician.
@@ -96,6 +104,38 @@ public class Clinician implements Serializable, QuadTreeElement {
     this.organization = organization;
     attributes = new ConcurrentHashMap<String, Object>();
     servicesProvided = new ArrayList<String>();
+  }
+
+  /**
+   * Initialize practice-style attributes drawn from distributions.
+   * Called after clinician creation to set behavioural variation parameters.
+   * @param rand Random number generator for reproducible draws.
+   */
+  public void initializePracticeAttributes(RandomNumberGenerator rand) {
+    practiceAttributes.put(PRACTICE_CESAREAN_PROPENSITY,
+        clampedGaussian(rand, 0.25, 0.08, 0.10, 0.45));
+    practiceAttributes.put(PRACTICE_REHAB_REFERRAL_PROPENSITY,
+        clampedGaussian(rand, 0.50, 0.15, 0.15, 0.85));
+    practiceAttributes.put(PRACTICE_ANTIBIOTIC_PROPENSITY,
+        clampedGaussian(rand, 0.30, 0.12, 0.05, 0.60));
+    practiceAttributes.put(PRACTICE_CKD_SCREENING_PROPENSITY,
+        clampedGaussian(rand, 0.55, 0.15, 0.20, 0.90));
+    practiceAttributes.put(PRACTICE_STATIN_PROPENSITY,
+        clampedGaussian(rand, 0.65, 0.15, 0.25, 0.95));
+  }
+
+  private static double clampedGaussian(RandomNumberGenerator rand,
+      double mean, double sd, double min, double max) {
+    double val = mean + rand.randGaussian() * sd;
+    return Math.max(min, Math.min(max, val));
+  }
+
+  public Double getPracticeAttribute(String key) {
+    return practiceAttributes.get(key);
+  }
+
+  public Map<String, Double> getPracticeAttributes() {
+    return practiceAttributes;
   }
 
   /**

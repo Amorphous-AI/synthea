@@ -196,6 +196,13 @@ public final class EncounterModule extends Module {
     encounter.provider = prov;
     // assign a clinician
     encounter.clinician = prov.chooseClinicianList(specialty, person);
+    // copy clinician practice attributes to patient so JSON modules can reference them
+    if (encounter.clinician != null) {
+      for (Map.Entry<String, Double> entry
+          : encounter.clinician.getPracticeAttributes().entrySet()) {
+        person.attributes.put("clinician_" + entry.getKey(), entry.getValue());
+      }
+    }
     return encounter;
   }
 

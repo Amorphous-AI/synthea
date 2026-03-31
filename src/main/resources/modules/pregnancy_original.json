@@ -36,18 +36,6 @@
       "type": "SetAttribute",
       "attribute": "number_of_children",
       "value": 0,
-      "direct_transition": "Initially_No_Previous_CS"
-    },
-    "Initially_No_Previous_CS": {
-      "type": "SetAttribute",
-      "attribute": "previous_cesarean",
-      "value": false,
-      "direct_transition": "Initially_No_Previous_CS_Count"
-    },
-    "Initially_No_Previous_CS_Count": {
-      "type": "SetAttribute",
-      "attribute": "number_of_previous_cesareans",
-      "value": 0,
       "direct_transition": "Become_Pregnant_Guard"
     },
     "Become_Pregnant_Guard": {
@@ -800,59 +788,6 @@
           "display": "Auscultation of the fetal heart (procedure)"
         }
       ],
-      "direct_transition": "Fetal_Count_Assessment"
-    },
-    "Fetal_Count_Assessment": {
-      "type": "Simple",
-      "remarks": [
-        "Assess number of fetuses at ~20 weeks via ultrasound.",
-        "96.7% singleton, 3.2% twins, 0.1% triplets or more."
-      ],
-      "distributed_transition": [
-        {
-          "distribution": 0.967,
-          "transition": "Set_Fetal_Count_Singleton"
-        },
-        {
-          "distribution": 0.032,
-          "transition": "Set_Fetal_Count_Twins"
-        },
-        {
-          "distribution": 0.001,
-          "transition": "Set_Fetal_Count_Triplets"
-        }
-      ]
-    },
-    "Set_Fetal_Count_Singleton": {
-      "type": "SetAttribute",
-      "attribute": "number_of_fetuses",
-      "value": 1,
-      "direct_transition": "Record_Fetal_Count"
-    },
-    "Set_Fetal_Count_Twins": {
-      "type": "SetAttribute",
-      "attribute": "number_of_fetuses",
-      "value": 2,
-      "direct_transition": "Record_Fetal_Count"
-    },
-    "Set_Fetal_Count_Triplets": {
-      "type": "SetAttribute",
-      "attribute": "number_of_fetuses",
-      "value": 3,
-      "direct_transition": "Record_Fetal_Count"
-    },
-    "Record_Fetal_Count": {
-      "type": "Observation",
-      "category": "imaging",
-      "codes": [
-        {
-          "system": "LOINC",
-          "code": "11878-6",
-          "display": "Number of fetuses by US"
-        }
-      ],
-      "attribute": "number_of_fetuses",
-      "unit": "{#}",
       "direct_transition": "End_Week_20_Visit"
     },
     "End_Week_20_Visit": {
@@ -1206,58 +1141,6 @@
           "display": "Auscultation of the fetal heart (procedure)"
         }
       ],
-      "direct_transition": "Fetal_Presentation_Assessment"
-    },
-    "Fetal_Presentation_Assessment": {
-      "type": "Simple",
-      "remarks": [
-        "Assess fetal presentation at ~36 weeks.",
-        "96% cephalic, 3.5% breech, 0.5% transverse."
-      ],
-      "distributed_transition": [
-        {
-          "distribution": 0.96,
-          "transition": "Set_Presentation_Cephalic"
-        },
-        {
-          "distribution": 0.035,
-          "transition": "Set_Presentation_Breech"
-        },
-        {
-          "distribution": 0.005,
-          "transition": "Set_Presentation_Transverse"
-        }
-      ]
-    },
-    "Set_Presentation_Cephalic": {
-      "type": "SetAttribute",
-      "attribute": "fetal_presentation",
-      "value": "cephalic",
-      "direct_transition": "Record_Fetal_Presentation"
-    },
-    "Set_Presentation_Breech": {
-      "type": "SetAttribute",
-      "attribute": "fetal_presentation",
-      "value": "breech",
-      "direct_transition": "Record_Fetal_Presentation"
-    },
-    "Set_Presentation_Transverse": {
-      "type": "SetAttribute",
-      "attribute": "fetal_presentation",
-      "value": "transverse",
-      "direct_transition": "Record_Fetal_Presentation"
-    },
-    "Record_Fetal_Presentation": {
-      "type": "Observation",
-      "category": "exam",
-      "codes": [
-        {
-          "system": "LOINC",
-          "code": "11876-0",
-          "display": "Fetal presentation by palpation"
-        }
-      ],
-      "attribute": "fetal_presentation",
       "direct_transition": "End_Week_36_Visit"
     },
     "End_Week_36_Visit": {
@@ -1343,7 +1226,7 @@
       "type": "SetAttribute",
       "attribute": "birth_type",
       "value": "premature",
-      "direct_transition": "Set_GA_Premature"
+      "direct_transition": "Birth"
     },
     "Week_39_Visit": {
       "type": "Encounter",
@@ -1390,7 +1273,7 @@
       "type": "SetAttribute",
       "attribute": "birth_type",
       "value": "normal",
-      "direct_transition": "Set_GA_Normal"
+      "direct_transition": "Birth"
     },
     "Week_40": {
       "type": "Delay",
@@ -1517,34 +1400,6 @@
       "type": "SetAttribute",
       "attribute": "birth_type",
       "value": "induced",
-      "direct_transition": "Set_GA_Postterm"
-    },
-    "Set_GA_Premature": {
-      "type": "SetAttribute",
-      "attribute": "gestational_age",
-      "value": 36,
-      "remarks": ["Premature births occur around week 36 in this module"],
-      "direct_transition": "Set_Default_Presentation_Premature"
-    },
-    "Set_Default_Presentation_Premature": {
-      "type": "SetAttribute",
-      "remarks": ["Premature births bypass week 36 visit, so set default cephalic presentation"],
-      "attribute": "fetal_presentation",
-      "value": "cephalic",
-      "direct_transition": "Birth"
-    },
-    "Set_GA_Normal": {
-      "type": "SetAttribute",
-      "attribute": "gestational_age",
-      "value": 39,
-      "remarks": ["Average gestational age for normal births (weeks 38-41)"],
-      "direct_transition": "Birth"
-    },
-    "Set_GA_Postterm": {
-      "type": "SetAttribute",
-      "attribute": "gestational_age",
-      "value": 42,
-      "remarks": ["Post-term induction at ~42 weeks"],
       "direct_transition": "Birth"
     },
     "Birth": {
@@ -1578,457 +1433,26 @@
           "display": "Obstetric emergency hospital admission (procedure)"
         }
       ],
-      "direct_transition": "Determine_Labour_Onset"
-    },
-    "Determine_Labour_Onset": {
-      "type": "Simple",
-      "remarks": [
-        "Set onset_of_labour based on birth_type. Induced (post-41 weeks) maps to 'induced'.",
-        "All others default to 'spontaneous'. Elected_CS overrides to 'no_labour' later."
-      ],
-      "conditional_transition": [
-        {
-          "condition": {
-            "condition_type": "Attribute",
-            "attribute": "birth_type",
-            "operator": "==",
-            "value": "induced"
-          },
-          "transition": "Set_Onset_Induced"
-        },
-        {
-          "transition": "Set_Onset_Spontaneous"
-        }
-      ]
-    },
-    "Set_Onset_Spontaneous": {
-      "type": "SetAttribute",
-      "attribute": "onset_of_labour",
-      "value": "spontaneous",
-      "direct_transition": "Classify_Robson_Group"
-    },
-    "Set_Onset_Induced": {
-      "type": "SetAttribute",
-      "attribute": "onset_of_labour",
-      "value": "induced",
-      "direct_transition": "Classify_Robson_Group"
-    },
-    "Classify_Robson_Group": {
-      "type": "Simple",
-      "remarks": [
-        "Robson Ten Group Classification System. Conditions are checked in priority order:",
-        "1. Previous cesarean -> Group 5",
-        "2. Preterm (birth_type premature, GA<37) -> Group 10",
-        "3. Multiple fetuses -> Group 8",
-        "4. Transverse lie -> Group 9",
-        "5. Breech + nulliparous -> Group 6",
-        "6. Breech + multiparous -> Group 7",
-        "7. Nulliparous + spontaneous -> Group 1",
-        "8. Nulliparous + induced/no_labour -> Group 2",
-        "9. Multiparous + spontaneous -> Group 3",
-        "10. Multiparous + induced/no_labour -> Group 4"
-      ],
-      "conditional_transition": [
-        {
-          "condition": {
-            "condition_type": "Attribute",
-            "attribute": "previous_cesarean",
-            "operator": "==",
-            "value": true
-          },
-          "transition": "Set_Robson_5"
-        },
-        {
-          "condition": {
-            "condition_type": "Attribute",
-            "attribute": "birth_type",
-            "operator": "==",
-            "value": "premature"
-          },
-          "transition": "Set_Robson_10"
-        },
-        {
-          "condition": {
-            "condition_type": "Attribute",
-            "attribute": "number_of_fetuses",
-            "operator": ">",
-            "value": 1
-          },
-          "transition": "Set_Robson_8"
-        },
-        {
-          "condition": {
-            "condition_type": "Attribute",
-            "attribute": "fetal_presentation",
-            "operator": "==",
-            "value": "transverse"
-          },
-          "transition": "Set_Robson_9"
-        },
-        {
-          "condition": {
-            "condition_type": "And",
-            "conditions": [
-              {
-                "condition_type": "Attribute",
-                "attribute": "fetal_presentation",
-                "operator": "==",
-                "value": "breech"
-              },
-              {
-                "condition_type": "Attribute",
-                "attribute": "number_of_children",
-                "operator": "==",
-                "value": 0
-              }
-            ]
-          },
-          "transition": "Set_Robson_6"
-        },
-        {
-          "condition": {
-            "condition_type": "Attribute",
-            "attribute": "fetal_presentation",
-            "operator": "==",
-            "value": "breech"
-          },
-          "transition": "Set_Robson_7"
-        },
-        {
-          "condition": {
-            "condition_type": "And",
-            "conditions": [
-              {
-                "condition_type": "Attribute",
-                "attribute": "number_of_children",
-                "operator": "==",
-                "value": 0
-              },
-              {
-                "condition_type": "Attribute",
-                "attribute": "onset_of_labour",
-                "operator": "==",
-                "value": "spontaneous"
-              }
-            ]
-          },
-          "transition": "Set_Robson_1"
-        },
-        {
-          "condition": {
-            "condition_type": "Attribute",
-            "attribute": "number_of_children",
-            "operator": "==",
-            "value": 0
-          },
-          "transition": "Set_Robson_2"
-        },
-        {
-          "condition": {
-            "condition_type": "Attribute",
-            "attribute": "onset_of_labour",
-            "operator": "==",
-            "value": "spontaneous"
-          },
-          "transition": "Set_Robson_3"
-        },
-        {
-          "transition": "Set_Robson_4"
-        }
-      ]
-    },
-    "Set_Robson_1": {
-      "type": "SetAttribute",
-      "attribute": "robson_group",
-      "value": 1,
-      "direct_transition": "Record_Robson_Group"
-    },
-    "Set_Robson_2": {
-      "type": "SetAttribute",
-      "attribute": "robson_group",
-      "value": 2,
-      "direct_transition": "Record_Robson_Group"
-    },
-    "Set_Robson_3": {
-      "type": "SetAttribute",
-      "attribute": "robson_group",
-      "value": 3,
-      "direct_transition": "Record_Robson_Group"
-    },
-    "Set_Robson_4": {
-      "type": "SetAttribute",
-      "attribute": "robson_group",
-      "value": 4,
-      "direct_transition": "Record_Robson_Group"
-    },
-    "Set_Robson_5": {
-      "type": "SetAttribute",
-      "attribute": "robson_group",
-      "value": 5,
-      "direct_transition": "Record_Robson_Group"
-    },
-    "Set_Robson_6": {
-      "type": "SetAttribute",
-      "attribute": "robson_group",
-      "value": 6,
-      "direct_transition": "Record_Robson_Group"
-    },
-    "Set_Robson_7": {
-      "type": "SetAttribute",
-      "attribute": "robson_group",
-      "value": 7,
-      "direct_transition": "Record_Robson_Group"
-    },
-    "Set_Robson_8": {
-      "type": "SetAttribute",
-      "attribute": "robson_group",
-      "value": 8,
-      "direct_transition": "Record_Robson_Group"
-    },
-    "Set_Robson_9": {
-      "type": "SetAttribute",
-      "attribute": "robson_group",
-      "value": 9,
-      "direct_transition": "Record_Robson_Group"
-    },
-    "Set_Robson_10": {
-      "type": "SetAttribute",
-      "attribute": "robson_group",
-      "value": 10,
-      "direct_transition": "Record_Robson_Group"
-    },
-    "Record_Robson_Group": {
-      "type": "Observation",
-      "category": "exam",
-      "codes": [
-        {
-          "system": "LOINC",
-          "code": "11977-6",
-          "display": "Robson classification group"
-        }
-      ],
-      "attribute": "robson_group",
-      "unit": "{#}",
-      "direct_transition": "Record_Gestational_Age_Obs"
-    },
-    "Record_Gestational_Age_Obs": {
-      "type": "Observation",
-      "category": "exam",
-      "codes": [
-        {
-          "system": "LOINC",
-          "code": "11884-4",
-          "display": "Gestational age Estimated"
-        }
-      ],
-      "attribute": "gestational_age",
-      "unit": "weeks",
-      "direct_transition": "Record_Labour_Onset_Obs"
-    },
-    "Record_Labour_Onset_Obs": {
-      "type": "Observation",
-      "category": "exam",
-      "codes": [
-        {
-          "system": "LOINC",
-          "code": "73774-0",
-          "display": "Onset of labor"
-        }
-      ],
-      "attribute": "onset_of_labour",
-      "direct_transition": "Robson_Delivery_Decision"
-    },
-    "Robson_Delivery_Decision": {
-      "type": "Simple",
-      "remarks": [
-        "Route to the appropriate delivery decision based on Robson group.",
-        "Groups 1-4: low-risk, CS rate modulated by clinician_cesarean_propensity.",
-        "Group 5: previous CS, ~70% repeat CS rate.",
-        "Groups 6-9: malpresentation/multiple, ~90% CS rate.",
-        "Group 10: preterm, ~30% CS rate."
-      ],
-      "conditional_transition": [
-        {
-          "condition": {
-            "condition_type": "Attribute",
-            "attribute": "robson_group",
-            "operator": "==",
-            "value": 5
-          },
-          "transition": "Robson_Previous_CS_Delivery"
-        },
-        {
-          "condition": {
-            "condition_type": "And",
-            "conditions": [
-              {
-                "condition_type": "Attribute",
-                "attribute": "robson_group",
-                "operator": ">=",
-                "value": 6
-              },
-              {
-                "condition_type": "Attribute",
-                "attribute": "robson_group",
-                "operator": "<=",
-                "value": 9
-              }
-            ]
-          },
-          "transition": "Robson_Malpresentation_Delivery"
-        },
-        {
-          "condition": {
-            "condition_type": "Attribute",
-            "attribute": "robson_group",
-            "operator": "==",
-            "value": 10
-          },
-          "transition": "Robson_Preterm_Delivery"
-        },
-        {
-          "transition": "Robson_Low_Risk_Delivery"
-        }
-      ]
-    },
-    "Robson_Low_Risk_Delivery": {
-      "type": "Simple",
-      "remarks": [
-        "Robson groups 1-4 (low-risk). CS rate influenced by clinician_cesarean_propensity.",
-        "Propensity is Normal(0.25, 0.08) clamped to [0.10, 0.45].",
-        "Higher propensity clinicians elect CS more often.",
-        "Emergency CS can still occur via Birth_Intervention pathway (~13% of vaginal attempts)."
-      ],
-      "complex_transition": [
-        {
-          "condition": {
-            "condition_type": "Attribute",
-            "attribute": "clinician_cesarean_propensity",
-            "operator": ">=",
-            "value": 0.35
-          },
-          "distributions": [
-            {
-              "distribution": 0.26,
-              "transition": "Elected_CS"
-            },
-            {
-              "distribution": 0.74,
-              "transition": "Vaginal_Delivery_Decision"
-            }
-          ]
-        },
-        {
-          "condition": {
-            "condition_type": "Attribute",
-            "attribute": "clinician_cesarean_propensity",
-            "operator": ">=",
-            "value": 0.25
-          },
-          "distributions": [
-            {
-              "distribution": 0.15,
-              "transition": "Elected_CS"
-            },
-            {
-              "distribution": 0.85,
-              "transition": "Vaginal_Delivery_Decision"
-            }
-          ]
-        },
-        {
-          "condition": {
-            "condition_type": "Attribute",
-            "attribute": "clinician_cesarean_propensity",
-            "operator": ">=",
-            "value": 0.15
-          },
-          "distributions": [
-            {
-              "distribution": 0.04,
-              "transition": "Elected_CS"
-            },
-            {
-              "distribution": 0.96,
-              "transition": "Vaginal_Delivery_Decision"
-            }
-          ]
-        },
-        {
-          "distributions": [
-            {
-              "distribution": 0.01,
-              "transition": "Elected_CS"
-            },
-            {
-              "distribution": 0.99,
-              "transition": "Vaginal_Delivery_Decision"
-            }
-          ]
-        }
-      ]
-    },
-    "Robson_Previous_CS_Delivery": {
-      "type": "Simple",
-      "remarks": ["Previous cesarean (Robson 5): ~70% repeat CS rate"],
       "distributed_transition": [
         {
-          "distribution": 0.70,
-          "transition": "Elected_CS"
-        },
-        {
-          "distribution": 0.30,
-          "transition": "Vaginal_Delivery_Decision"
-        }
-      ]
-    },
-    "Robson_Malpresentation_Delivery": {
-      "type": "Simple",
-      "remarks": ["Malpresentation/multiple pregnancy (Robson 6-9): ~90% CS rate"],
-      "distributed_transition": [
-        {
-          "distribution": 0.90,
-          "transition": "Elected_CS"
-        },
-        {
-          "distribution": 0.025,
-          "transition": "Spontaneous_Breech"
-        },
-        {
-          "distribution": 0.075,
-          "transition": "Vaginal_Delivery_Decision"
-        }
-      ]
-    },
-    "Robson_Preterm_Delivery": {
-      "type": "Simple",
-      "remarks": ["Preterm (Robson 10): ~30% CS rate"],
-      "distributed_transition": [
-        {
-          "distribution": 0.30,
-          "transition": "Elected_CS"
-        },
-        {
-          "distribution": 0.70,
-          "transition": "Vaginal_Delivery_Decision"
-        }
-      ]
-    },
-    "Vaginal_Delivery_Decision": {
-      "type": "Simple",
-      "remarks": ["Distribution among vaginal delivery pathways (rescaled from original minus CS/breech)"],
-      "distributed_transition": [
-        {
-          "distribution": 0.128,
+          "distribution": 0.117,
           "transition": "Spontaneous_Vaginal_Delivery"
         },
         {
-          "distribution": 0.792,
+          "distribution": 0.7246,
           "transition": "Birth_Intervention"
         },
         {
-          "distribution": 0.080,
+          "distribution": 0.0736,
           "transition": "Assisted_Delivery"
+        },
+        {
+          "distribution": 0.0025,
+          "transition": "Spontaneous_Breech"
+        },
+        {
+          "distribution": 0.0823,
+          "transition": "Elected_CS"
         }
       ]
     },
@@ -2166,19 +1590,7 @@
       "direct_transition": "Give_Birth"
     },
     "Elected_CS": {
-      "type": "SetAttribute",
-      "attribute": "birth_type",
-      "value": "induced",
-      "remarks": [
-        "Fix: Elected CS now correctly sets birth_type to route to cesarean procedure.",
-        "Also chains to set onset_of_labour = 'no_labour' for pre-labour CS."
-      ],
-      "direct_transition": "Set_Elected_CS_Labour_Onset"
-    },
-    "Set_Elected_CS_Labour_Onset": {
-      "type": "SetAttribute",
-      "attribute": "onset_of_labour",
-      "value": "no_labour",
+      "type": "Simple",
       "direct_transition": "Give_Birth"
     },
     "Emergency_CS": {
@@ -2234,7 +1646,7 @@
           "display": "Human parturition, function (observable entity)"
         }
       ],
-      "direct_transition": "Set_Delivery_Vaginal"
+      "direct_transition": "Normal_Pregnancy_Completion"
     },
     "Premature_Birth_Procedure": {
       "type": "Procedure",
@@ -2246,7 +1658,7 @@
           "display": "Premature birth of newborn (finding)"
         }
       ],
-      "direct_transition": "Set_Delivery_Vaginal"
+      "direct_transition": "Normal_Pregnancy_Completion"
     },
     "Induced_Birth_Procedure": {
       "type": "Procedure",
@@ -2258,18 +1670,6 @@
           "display": "Cesarean section (procedure)"
         }
       ],
-      "direct_transition": "Set_Delivery_Cesarean"
-    },
-    "Set_Delivery_Vaginal": {
-      "type": "SetAttribute",
-      "attribute": "delivery_was_cesarean",
-      "value": false,
-      "direct_transition": "Normal_Pregnancy_Completion"
-    },
-    "Set_Delivery_Cesarean": {
-      "type": "SetAttribute",
-      "attribute": "delivery_was_cesarean",
-      "value": true,
       "direct_transition": "Normal_Pregnancy_Completion"
     },
     "Miscarriage_In_First_Trimester": {
@@ -2693,47 +2093,8 @@
         " PREGNANCY COMPLETION                                                 ",
         "======================================================================",
         "A pregnancy resulting in live birth increments the 'number_of_children' ",
-        "counter. This allows us to track how many children are born to each mother.",
-        "Then checks if delivery was cesarean to update persistent CS history."
+        "counter. This allows us to track how many children are born to each mother."
       ],
-      "direct_transition": "Check_Cesarean_History"
-    },
-    "Check_Cesarean_History": {
-      "type": "Simple",
-      "remarks": [
-        "If this delivery was a cesarean, update previous_cesarean and increment the count.",
-        "These attributes persist across pregnancies for Robson group 5 classification."
-      ],
-      "conditional_transition": [
-        {
-          "condition": {
-            "condition_type": "Attribute",
-            "attribute": "delivery_was_cesarean",
-            "operator": "==",
-            "value": true
-          },
-          "transition": "Update_Previous_Cesarean"
-        },
-        {
-          "transition": "Post_Delivery_Cleanup"
-        }
-      ]
-    },
-    "Update_Previous_Cesarean": {
-      "type": "SetAttribute",
-      "attribute": "previous_cesarean",
-      "value": true,
-      "direct_transition": "Increment_Previous_CS_Count"
-    },
-    "Increment_Previous_CS_Count": {
-      "type": "Counter",
-      "action": "increment",
-      "attribute": "number_of_previous_cesareans",
-      "direct_transition": "Post_Delivery_Cleanup"
-    },
-    "Post_Delivery_Cleanup": {
-      "type": "Simple",
-      "remarks": ["Continue to existing complication/careplan end flow"],
       "conditional_transition": [
         {
           "condition": {

@@ -342,8 +342,97 @@
       "type": "Simple",
       "remarks": [
         "Up to 95% of bronchitis cases are viral so antibiotics are rarely prescribed",
-        "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC2278319/"
+        "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC2278319/",
+        "VALUE-ENGINE: High-propensity clinicians may inappropriately prescribe antibiotics",
+        "for acute bronchitis — a well-documented low-value practice."
       ],
+      "conditional_transition": [
+        {
+          "condition": {
+            "condition_type": "Attribute",
+            "attribute": "clinician_antibiotic_propensity",
+            "operator": ">=",
+            "value": 0.35
+          },
+          "transition": "Bronchitis_Antibiotic_Propensity_Check"
+        },
+        {
+          "transition": "OTC_Medicine_Selection"
+        }
+      ]
+    },
+    "Bronchitis_Antibiotic_Propensity_Check": {
+      "type": "Simple",
+      "remarks": [
+        "VALUE-ENGINE: propensity >= 0.50 gives 50% chance of inappropriate Rx;",
+        "propensity 0.35-0.50 gives 25% chance."
+      ],
+      "complex_transition": [
+        {
+          "condition": {
+            "condition_type": "Attribute",
+            "attribute": "clinician_antibiotic_propensity",
+            "operator": ">=",
+            "value": 0.50
+          },
+          "distributions": [
+            {
+              "distribution": 0.50,
+              "transition": "Record_Inappropriate_Antibiotic_Bronchitis"
+            },
+            {
+              "distribution": 0.50,
+              "transition": "OTC_Medicine_Selection"
+            }
+          ]
+        },
+        {
+          "distributions": [
+            {
+              "distribution": 0.25,
+              "transition": "Record_Inappropriate_Antibiotic_Bronchitis"
+            },
+            {
+              "distribution": 0.75,
+              "transition": "OTC_Medicine_Selection"
+            }
+          ]
+        }
+      ]
+    },
+    "Record_Inappropriate_Antibiotic_Bronchitis": {
+      "type": "Observation",
+      "category": "survey",
+      "codes": [
+        {
+          "system": "SNOMED-CT",
+          "code": "428119001",
+          "display": "Procedure not indicated (situation)"
+        }
+      ],
+      "unit": "{nominal}",
+      "value_code": {
+        "system": "SNOMED-CT",
+        "code": "281789004",
+        "display": "Antibiotic therapy (procedure)"
+      },
+      "direct_transition": "Prescribe_Inappropriate_Antibiotic_Bronchitis"
+    },
+    "Prescribe_Inappropriate_Antibiotic_Bronchitis": {
+      "type": "MedicationOrder",
+      "assign_to_attribute": "OTC_Bronchitis_Med",
+      "reason": "Bronchitis_Infection",
+      "codes": [
+        {
+          "system": "RxNorm",
+          "code": "212446",
+          "display": "azithromycin 250 MG Oral Tablet [Zithromax]"
+        }
+      ],
+      "direct_transition": "End_Doctor_Visit"
+    },
+    "OTC_Medicine_Selection": {
+      "type": "Simple",
       "complex_transition": [
         {
           "condition": {
@@ -361,9 +450,6 @@
               "distribution": 0.2,
               "transition": "Acetaminophen"
             }
-          ],
-          "remarks": [
-            "cough suppressants shouldn't be given if the cough brings up mucus"
           ]
         },
         {

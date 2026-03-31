@@ -181,7 +181,10 @@
       "encounter_class": "ambulatory",
       "reason": "Sinusitis Condition",
       "remarks": [
-        "Antibiotics are overprescribed for sinus infections"
+        "Antibiotics are overprescribed for sinus infections.",
+        "VALUE-ENGINE: prescribing now driven by clinician_antibiotic_propensity.",
+        "Bacterial sinusitis appropriately gets antibiotics at high rates.",
+        "Viral sinusitis should rarely get antibiotics but high-propensity clinicians prescribe them."
       ],
       "codes": [
         {
@@ -190,16 +193,115 @@
           "display": "Encounter for symptom (procedure)"
         }
       ],
-      "distributed_transition": [
+      "conditional_transition": [
         {
-          "distribution": 0.8,
-          "transition": "End_Encounter"
+          "condition": {
+            "condition_type": "Active Condition",
+            "codes": [
+              {
+                "system": "SNOMED-CT",
+                "code": "75498004",
+                "display": "Acute bacterial sinusitis (disorder)"
+              }
+            ]
+          },
+          "transition": "Bacterial_Sinusitis_Antibiotic_Decision"
         },
         {
-          "distribution": 0.2,
-          "transition": "Penicillin_Allergy_Check"
+          "transition": "Viral_Sinusitis_Antibiotic_Decision"
         }
       ]
+    },
+    "Bacterial_Sinusitis_Antibiotic_Decision": {
+      "type": "Simple",
+      "remarks": [
+        "Bacterial sinusitis: antibiotics are guideline-appropriate. 85% prescribed."
+      ],
+      "distributed_transition": [
+        {
+          "distribution": 0.85,
+          "transition": "Penicillin_Allergy_Check"
+        },
+        {
+          "distribution": 0.15,
+          "transition": "End_Encounter"
+        }
+      ]
+    },
+    "Viral_Sinusitis_Antibiotic_Decision": {
+      "type": "Simple",
+      "remarks": [
+        "VALUE-ENGINE: Viral/inflammatory sinusitis should NOT get antibiotics.",
+        "High-propensity clinicians prescribe them inappropriately."
+      ],
+      "complex_transition": [
+        {
+          "condition": {
+            "condition_type": "Attribute",
+            "attribute": "clinician_antibiotic_propensity",
+            "operator": ">=",
+            "value": 0.45
+          },
+          "distributions": [
+            {
+              "distribution": 0.55,
+              "transition": "Record_Inappropriate_Antibiotic_Sinusitis"
+            },
+            {
+              "distribution": 0.45,
+              "transition": "End_Encounter"
+            }
+          ]
+        },
+        {
+          "condition": {
+            "condition_type": "Attribute",
+            "attribute": "clinician_antibiotic_propensity",
+            "operator": ">=",
+            "value": 0.25
+          },
+          "distributions": [
+            {
+              "distribution": 0.25,
+              "transition": "Record_Inappropriate_Antibiotic_Sinusitis"
+            },
+            {
+              "distribution": 0.75,
+              "transition": "End_Encounter"
+            }
+          ]
+        },
+        {
+          "distributions": [
+            {
+              "distribution": 0.08,
+              "transition": "Record_Inappropriate_Antibiotic_Sinusitis"
+            },
+            {
+              "distribution": 0.92,
+              "transition": "End_Encounter"
+            }
+          ]
+        }
+      ]
+    },
+    "Record_Inappropriate_Antibiotic_Sinusitis": {
+      "type": "Observation",
+      "category": "survey",
+      "codes": [
+        {
+          "system": "SNOMED-CT",
+          "code": "428119001",
+          "display": "Procedure not indicated (situation)"
+        }
+      ],
+      "unit": "{nominal}",
+      "value_code": {
+        "system": "SNOMED-CT",
+        "code": "281789004",
+        "display": "Antibiotic therapy (procedure)"
+      },
+      "direct_transition": "Penicillin_Allergy_Check"
     },
     "Prescribe_Antibiotic": {
       "type": "MedicationOrder",
