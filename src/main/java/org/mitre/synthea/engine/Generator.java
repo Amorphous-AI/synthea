@@ -1026,12 +1026,37 @@ public class Generator {
   }
 
   private Predicate<String> getModulePredicate() {
+    Predicate<String> enabled;
     if (options.enabledModules == null) {
-      return path -> true;
+      enabled = path -> true;
+    } else {
+      FilenameFilter filenameFilter = new WildcardFileFilter(options.enabledModules,
+          IOCase.INSENSITIVE);
+      enabled = path -> filenameFilter.accept(null, path);
     }
-    FilenameFilter filenameFilter = new WildcardFileFilter(options.enabledModules,
-        IOCase.INSENSITIVE);
-    return path -> filenameFilter.accept(null, path);
+    String disabledList = Config.get("generate.disabled_modules", "");
+    if (disabledList == null || disabledList.trim().isEmpty()) {
+      return enabled;
+    }
+    String[] disabled = disabledList.split(",");
+    return path -> {
+      if (!enabled.test(path)) {
+        return false;
+      }
+      String normalized = path.replace('\\', '/');
+      for (String raw : disabled) {
+        String name = raw.trim();
+        if (name.isEmpty()) {
+          continue;
+        }
+        if (normalized.equals(name)
+            || normalized.endsWith("/" + name)
+            || normalized.startsWith(name + "/")) {
+          return false;
+        }
+      }
+      return true;
+    };
   }
 
   /**

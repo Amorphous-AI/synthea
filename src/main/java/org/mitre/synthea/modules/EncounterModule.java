@@ -7,6 +7,7 @@ import java.util.Map;
 import org.mitre.synthea.engine.Module;
 import org.mitre.synthea.helpers.Attributes;
 import org.mitre.synthea.helpers.Attributes.Inventory;
+import org.mitre.synthea.helpers.Config;
 import org.mitre.synthea.helpers.Utilities;
 import org.mitre.synthea.world.agents.Person;
 import org.mitre.synthea.world.agents.Provider;
@@ -50,6 +51,14 @@ public final class EncounterModule extends Module {
   /** Attribute key for the last visit symptom total. */
   public static final String LAST_VISIT_SYMPTOM_TOTAL = "last_visit_symptom_total";
 
+  /**
+   * Last time a wellness <em>window</em> opened when scheduled wellness
+   * encounters are disabled. Disease modules still unblock on this cadence
+   * so hypertension / diabetes / etc. can be diagnosed, but no empty
+   * checkup is written to the record.
+   */
+  public static final String LAST_WELLNESS_WINDOW = "last_wellness_window";
+
   /** Code for a check-up encounter. */
   public static final Code ENCOUNTER_CHECKUP = new Code("SNOMED-CT", "185349003",
       "Encounter for check up (procedure)");
@@ -69,6 +78,10 @@ public final class EncounterModule extends Module {
   /** Code for an urgent care clinic visit. */
   public static final Code ENCOUNTER_URGENTCARE = new Code("SNOMED-CT", "702927004",
       "Urgent care clinic (environment)");
+
+  /** Code for a problem-driven visit (used when wellness is converted to a diagnosis). */
+  public static final Code ENCOUNTER_PROBLEM = new Code("SNOMED-CT", "185347001",
+      "Encounter for problem (procedure)");
   // NOTE: if new codes are added, be sure to update getAllCodes below
 
   /**
@@ -76,6 +89,22 @@ public final class EncounterModule extends Module {
    */
   public EncounterModule() {
     this.name = EncounterModule.NAME;
+  }
+
+  /**
+   * Whether scheduled wellness / well-child / general-exam encounters are
+   * disabled. Used by Canon hospital-lake generation so the record is not
+   * flooded with reason-less primary-care checkups.
+   */
+  public static boolean wellnessEncountersDisabled() {
+    return Config.getAsBoolean("generate.disable_wellness_encounters", false);
+  }
+
+  /**
+   * Whether encounter-driven immunizations are disabled.
+   */
+  public static boolean immunizationsDisabled() {
+    return Config.getAsBoolean("generate.disable_immunizations", false);
   }
 
   /**
@@ -99,15 +128,20 @@ public final class EncounterModule extends Module {
     boolean startedEncounter = false;
     Encounter encounter = null;
 
-    // add a wellness encounter if this is the right time
-    if (person.record.timeSinceLastWellnessEncounter(time)
-        >= recommendedTimeBetweenWellnessVisits(person, time)) {
-      Code code = getWellnessVisitCode(person, time);
-      encounter = createEncounter(person, time, EncounterType.WELLNESS,
-          ClinicianSpecialty.GENERAL_PRACTICE, code, name);
-      encounter.name = "Encounter Module Scheduled Wellness";
+    // Scheduled wellness is a primary-care product (annual physical,
+    // well-child, vaccine-only). Hospital lakes do not look like that:
+    // open a window so disease modules can diagnose, but do not write
+    // an empty checkup to the record.
+    if (wellnessWindowDue(person, time)) {
       person.attributes.put(ACTIVE_WELLNESS_ENCOUNTER, true);
-      startedEncounter = true;
+      person.attributes.put(LAST_WELLNESS_WINDOW, time);
+      if (!wellnessEncountersDisabled()) {
+        Code code = getWellnessVisitCode(person, time);
+        encounter = createEncounter(person, time, EncounterType.WELLNESS,
+            ClinicianSpecialty.GENERAL_PRACTICE, code, name);
+        encounter.name = "Encounter Module Scheduled Wellness";
+        startedEncounter = true;
+      }
     } else if (person.symptomTotal() > EMERGENCY_SYMPTOM_THRESHOLD) {
       if (!person.attributes.containsKey(LAST_VISIT_SYMPTOM_TOTAL)) {
         person.attributes.put(LAST_VISIT_SYMPTOM_TOTAL, 0);
@@ -149,7 +183,7 @@ public final class EncounterModule extends Module {
       }
     }
 
-    if (startedEncounter) {
+    if (startedEncounter && !immunizationsDisabled()) {
       Immunizations.performEncounter(person, time);
     }
 
@@ -261,11 +295,31 @@ public final class EncounterModule extends Module {
   }
 
   /**
+   * Whether a wellness window should open at {@code time}. Uses the last
+   * recorded wellness encounter when those are enabled, otherwise the last
+   * virtual window so disabling export does not open a window every timestep.
+   */
+  public boolean wellnessWindowDue(Person person, long time) {
+    long interval = recommendedTimeBetweenWellnessVisits(person, time);
+    if (wellnessEncountersDisabled()) {
+      Object last = person.attributes.get(LAST_WELLNESS_WINDOW);
+      if (last instanceof Long) {
+        return (time - (Long) last) >= interval;
+      }
+      return true;
+    }
+    return person.record.timeSinceLastWellnessEncounter(time) >= interval;
+  }
+
+  /**
    * End a wellness encounter if currently active.
    * @param person The patient.
    * @param time The time of the encounter end.
    */
   public void endEncounterModuleEncounters(Person person, long time) {
+    if (wellnessEncountersDisabled()) {
+      person.attributes.remove(ACTIVE_WELLNESS_ENCOUNTER);
+    }
     if (person.hasCurrentEncounter()
         && person.getCurrentEncounterModule().equals(name)) {
       if (person.attributes.get(ACTIVE_WELLNESS_ENCOUNTER) != null) {
@@ -292,7 +346,7 @@ public final class EncounterModule extends Module {
    */
   public static Collection<Code> getAllCodes() {
     return Arrays.asList(ENCOUNTER_CHECKUP, ENCOUNTER_EMERGENCY,
-        WELL_CHILD_VISIT, GENERAL_EXAM, ENCOUNTER_URGENTCARE);
+        WELL_CHILD_VISIT, GENERAL_EXAM, ENCOUNTER_URGENTCARE, ENCOUNTER_PROBLEM);
   }
 
   /**

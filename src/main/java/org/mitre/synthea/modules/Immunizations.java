@@ -58,6 +58,9 @@ public class Immunizations {
    */
   @SuppressWarnings({ "unchecked", "rawtypes" })
   public static void performEncounter(Person person, long time) {
+    if (EncounterModule.immunizationsDisabled()) {
+      return;
+    }
     Map<String, List<Long>> immunizationsGiven;
     if (person.attributes.containsKey(IMMUNIZATIONS)) {
       immunizationsGiven = (Map<String, List<Long>>) person.attributes.get(IMMUNIZATIONS);

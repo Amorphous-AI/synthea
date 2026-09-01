@@ -948,6 +948,9 @@ public abstract class State implements Cloneable, Serializable {
     @Override
     public boolean process(Person person, long time) {
       if (wellness) {
+        if (EncounterModule.wellnessEncountersDisabled()) {
+          return processWellnessAsHospitalVisit(person, time);
+        }
         if (person.hasCurrentEncounter()
             && person.getCurrentEncounterModule().equals(EncounterModule.NAME)) {
           HealthRecord.Encounter encounter = person.record.currentEncounter(time);
@@ -1058,6 +1061,101 @@ public abstract class State implements Cloneable, Serializable {
         }
 
         return true;
+      }
+    }
+
+    /**
+     * When scheduled wellness is disabled, disease modules still need a
+     * place to record a new diagnosis. Open a real ambulatory visit only
+     * if a ConditionOnset is waiting for this encounter; otherwise skip
+     * the empty checkup so it cannot become R69 / Z00 in a hospital lake.
+     */
+    private boolean processWellnessAsHospitalVisit(Person person, long time) {
+      if (person.attributes.get(EncounterModule.ACTIVE_WELLNESS_ENCOUNTER) == null) {
+        return false;
+      }
+      String activeKey = EncounterModule.ACTIVE_WELLNESS_ENCOUNTER + " " + module.name;
+      String usedKey = activeKey + "_window";
+      Object window = person.attributes.get(EncounterModule.LAST_WELLNESS_WINDOW);
+      if (window != null && window.equals(person.attributes.get(usedKey))) {
+        return false;
+      }
+      if (person.hasCurrentEncounter()
+          && !person.getCurrentEncounterModule().equals(module.name)
+          && !person.getCurrentEncounterModule().equals(EncounterModule.NAME)) {
+        return false;
+      }
+      if (!hasUndiagnosedOnset(person)) {
+        person.attributes.put(usedKey, window);
+        person.attributes.put(activeKey, true);
+        return false;
+      }
+      if (person.hasCurrentEncounter()
+          && person.getCurrentEncounterModule().equals(module.name)) {
+        HealthRecord.Encounter encounter = person.record.currentEncounter(time);
+        entry = encounter;
+        person.attributes.put(usedKey, window);
+        person.attributes.put(activeKey, true);
+        diagnosePastConditions(person, time);
+        assignReasonFromRecordedConditions(encounter, person);
+        return true;
+      }
+      String specialty = ClinicianSpecialty.GENERAL_PRACTICE;
+      if (this.module.specialty != null) {
+        specialty = this.module.specialty;
+      }
+      HealthRecord.Encounter encounter = EncounterModule.createEncounter(
+          person, time, EncounterType.AMBULATORY, specialty, null, module.name);
+      if (encounter == null) {
+        return false;
+      }
+      entry = encounter;
+      if (codes != null) {
+        encounter.mergeCodeList(codes);
+      }
+      if (encounter.codes.isEmpty()) {
+        encounter.codes.add(EncounterModule.ENCOUNTER_PROBLEM);
+      }
+      encounter.name = this.name;
+      diagnosePastConditions(person, time);
+      assignReasonFromRecordedConditions(encounter, person);
+      person.attributes.put(usedKey, window);
+      person.attributes.put(activeKey, true);
+      return true;
+    }
+
+    private boolean hasUndiagnosedOnset(Person person) {
+      for (State state : person.history) {
+        if (state instanceof OnsetState) {
+          OnsetState onset = (OnsetState) state;
+          if (!onset.diagnosed && this.name.equals(onset.targetEncounter)) {
+            return true;
+          }
+        } else if (state instanceof Encounter && state != this && state.name.equals(this.name)) {
+          break;
+        }
+      }
+      return false;
+    }
+
+    private void assignReasonFromRecordedConditions(
+        HealthRecord.Encounter encounter, Person person) {
+      if (encounter == null || encounter.reason != null) {
+        return;
+      }
+      if (encounter.conditions != null) {
+        for (Entry condition : encounter.conditions) {
+          if (condition.codes != null && !condition.codes.isEmpty()) {
+            encounter.reason = condition.codes.get(0);
+            return;
+          }
+        }
+      }
+      for (Entry present : person.record.present.values()) {
+        if (present.codes != null && !present.codes.isEmpty()) {
+          encounter.reason = present.codes.get(0);
+          return;
+        }
       }
     }
 

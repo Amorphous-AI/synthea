@@ -1122,6 +1122,9 @@ public class HealthRecord implements Serializable {
   public Encounter currentEncounter(long time) {
     Encounter encounter = null;
     if (encounters.size() == 0) {
+      if (EncounterModule.wellnessEncountersDisabled()) {
+        return null;
+      }
       encounter = EncounterModule.createEncounter(person, time, EncounterType.WELLNESS,
           ClinicianSpecialty.GENERAL_PRACTICE,
           EncounterModule.WELL_CHILD_VISIT, EncounterModule.NAME);
@@ -1172,7 +1175,11 @@ public class HealthRecord implements Serializable {
    * @return the new observation.
    */
   public Observation observation(long time, String type, Object value) {
-    return currentEncounter(time).addObservation(time, type, value);
+    Encounter encounter = currentEncounter(time);
+    if (encounter == null) {
+      return new Observation(time, type, value);
+    }
+    return encounter.addObservation(time, type, value);
   }
 
   /**
@@ -1189,6 +1196,9 @@ public class HealthRecord implements Serializable {
   public Observation multiObservation(long time, String type, int numberOfObservations) {
     Observation observation = new Observation(time, type, null);
     Encounter encounter = currentEncounter(time);
+    if (encounter == null) {
+      return observation;
+    }
     int count = numberOfObservations;
     if (encounter.observations.size() >= numberOfObservations) {
       while (count > 0) {
@@ -1227,8 +1237,18 @@ public class HealthRecord implements Serializable {
     if (!present.containsKey(primaryCode)) {
       Entry condition = new Entry(time, primaryCode);
       Encounter encounter = currentEncounter(time);
-      encounter.conditions.add(condition);
-      encounter.claim.addLineItem(condition);
+      if (encounter == null) {
+        encounter = EncounterModule.createEncounter(person, time, EncounterType.AMBULATORY,
+            ClinicianSpecialty.GENERAL_PRACTICE, EncounterModule.ENCOUNTER_PROBLEM,
+            EncounterModule.NAME);
+      }
+      if (encounter != null) {
+        encounter.conditions.add(condition);
+        encounter.claim.addLineItem(condition);
+        if (encounter.reason == null && condition.codes != null && !condition.codes.isEmpty()) {
+          encounter.reason = condition.codes.get(0);
+        }
+      }
       present.put(primaryCode, condition);
     }
     return present.get(primaryCode);
@@ -1360,8 +1380,15 @@ public class HealthRecord implements Serializable {
   public Procedure procedure(long time, String type) {
     Procedure procedure = new Procedure(time, type);
     Encounter encounter = currentEncounter(time);
-    encounter.procedures.add(procedure);
-    encounter.claim.addLineItem(procedure);
+    if (encounter == null) {
+      encounter = EncounterModule.createEncounter(person, time, EncounterType.AMBULATORY,
+          ClinicianSpecialty.GENERAL_PRACTICE, EncounterModule.ENCOUNTER_PROBLEM,
+          EncounterModule.NAME);
+    }
+    if (encounter != null) {
+      encounter.procedures.add(procedure);
+      encounter.claim.addLineItem(procedure);
+    }
     present.put(type, procedure);
     return procedure;
   }
@@ -1376,6 +1403,9 @@ public class HealthRecord implements Serializable {
     Device device = new Device(time, type);
     device.generateUDI(person);
     Encounter encounter = currentEncounter(time);
+    if (encounter == null) {
+      return device;
+    }
     encounter.devices.add(device);
     encounter.claim.addLineItem(device);
     present.put(type, device);
@@ -1510,8 +1540,10 @@ public class HealthRecord implements Serializable {
   public Immunization immunization(long time, String type) {
     Immunization immunization = new Immunization(time, type);
     Encounter encounter = currentEncounter(time);
-    encounter.immunizations.add(immunization);
-    encounter.claim.addLineItem(immunization);
+    if (encounter != null) {
+      encounter.immunizations.add(immunization);
+      encounter.claim.addLineItem(immunization);
+    }
     return immunization;
   }
 
@@ -1531,7 +1563,14 @@ public class HealthRecord implements Serializable {
       medication.chronic = chronic;
 
       Encounter encounter = currentEncounter(time);
-      encounter.medications.add(medication);
+      if (encounter == null) {
+        encounter = EncounterModule.createEncounter(person, time, EncounterType.AMBULATORY,
+            ClinicianSpecialty.GENERAL_PRACTICE, EncounterModule.ENCOUNTER_PROBLEM,
+            EncounterModule.NAME);
+      }
+      if (encounter != null) {
+        encounter.medications.add(medication);
+      }
       /* Do not add medications to the Encounter claim.
        * Medications submit separate claims.
        */
