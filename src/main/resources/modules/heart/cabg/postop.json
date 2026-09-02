@@ -280,6 +280,92 @@
         "unit": "minutes"
       },
       "reason": "cabg_history",
+      "direct_transition": "CABG_Check_Rehab_Referral"
+    },
+    "CABG_Check_Rehab_Referral": {
+      "type": "Simple",
+      "complex_transition": [
+        {
+          "condition": {
+            "condition_type": "Attribute",
+            "attribute": "clinician_rehab_referral_propensity",
+            "operator": ">=",
+            "value": 0.5
+          },
+          "distributions": [
+            {
+              "transition": "CABG_Refer_To_Cardiac_Rehab",
+              "distribution": 0.85
+            },
+            {
+              "transition": "CABG_No_Rehab_Referral",
+              "distribution": 0.15
+            }
+          ]
+        },
+        {
+          "condition": {
+            "condition_type": "Attribute",
+            "attribute": "clinician_rehab_referral_propensity",
+            "operator": ">=",
+            "value": 0.3
+          },
+          "distributions": [
+            {
+              "transition": "CABG_Refer_To_Cardiac_Rehab",
+              "distribution": 0.7
+            },
+            {
+              "transition": "CABG_No_Rehab_Referral",
+              "distribution": 0.3
+            }
+          ]
+        },
+        {
+          "distributions": [
+            {
+              "transition": "CABG_Refer_To_Cardiac_Rehab",
+              "distribution": 0.45
+            },
+            {
+              "transition": "CABG_No_Rehab_Referral",
+              "distribution": 0.55
+            }
+          ]
+        }
+      ]
+    },
+    "CABG_Refer_To_Cardiac_Rehab": {
+      "type": "SetAttribute",
+      "attribute": "cardiac_rehab_referred",
+      "value": true,
+      "direct_transition": "CABG_Rehab_Referral_Procedure"
+    },
+    "CABG_Rehab_Referral_Procedure": {
+      "type": "Procedure",
+      "codes": [
+        {
+          "system": "SNOMED-CT",
+          "code": "306353006",
+          "display": "Referral to cardiac rehabilitation service (procedure)"
+        }
+      ],
+      "duration": {
+        "low": 5,
+        "high": 15,
+        "unit": "minutes"
+      },
+      "reason": "cabg_history",
+      "direct_transition": "CABG_Discharge_Disposition"
+    },
+    "CABG_No_Rehab_Referral": {
+      "type": "SetAttribute",
+      "attribute": "cardiac_rehab_referred",
+      "value": false,
+      "direct_transition": "CABG_Discharge_Disposition"
+    },
+    "CABG_Discharge_Disposition": {
+      "type": "Simple",
       "complex_transition": [
         {
           "condition": {

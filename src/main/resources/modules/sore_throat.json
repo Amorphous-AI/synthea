@@ -318,7 +318,9 @@
         "the Centor criteria are used to determine if a sore throat is bacterial",
         "http://www.mdcalc.com/modified-centor-score-for-strep-pharyngitis/",
         "modified slightly here to account for our simpler logic",
-        "(we can't do -1 for age > 44 so we do +1 for age <= 44, and require an extra +1)"
+        "(we can't do -1 for age > 44 so we do +1 for age <= 44, and require an extra +1)",
+        "VALUE-ENGINE: viral pharyngitis cases now check clinician_antibiotic_propensity",
+        "to model inappropriate antibiotic prescribing for viral URTI (low-value care)"
       ],
       "conditional_transition": [
         {
@@ -424,9 +426,94 @@
           "transition": "Throat_Culture"
         },
         {
+          "condition": {
+            "condition_type": "And",
+            "conditions": [
+              {
+                "condition_type": "Active Condition",
+                "codes": [
+                  {
+                    "system": "SNOMED-CT",
+                    "code": "195662009",
+                    "display": "Acute viral pharyngitis (disorder)"
+                  }
+                ]
+              },
+              {
+                "condition_type": "Attribute",
+                "attribute": "clinician_antibiotic_propensity",
+                "operator": ">=",
+                "value": 0.35
+              }
+            ]
+          },
+          "transition": "Check_Viral_Antibiotic_Propensity"
+        },
+        {
           "transition": "End_Encounter"
         }
       ]
+    },
+    "Check_Viral_Antibiotic_Propensity": {
+      "type": "Simple",
+      "remarks": [
+        "VALUE-ENGINE: Clinicians with high antibiotic propensity inappropriately",
+        "prescribe antibiotics for confirmed viral pharyngitis. Propensity >= 0.45",
+        "gives 70% chance; 0.35-0.45 gives 40% chance."
+      ],
+      "complex_transition": [
+        {
+          "condition": {
+            "condition_type": "Attribute",
+            "attribute": "clinician_antibiotic_propensity",
+            "operator": ">=",
+            "value": 0.45
+          },
+          "distributions": [
+            {
+              "distribution": 0.70,
+              "transition": "Record_Inappropriate_Antibiotic_Pharyngitis"
+            },
+            {
+              "distribution": 0.30,
+              "transition": "End_Encounter"
+            }
+          ]
+        },
+        {
+          "distributions": [
+            {
+              "distribution": 0.40,
+              "transition": "Record_Inappropriate_Antibiotic_Pharyngitis"
+            },
+            {
+              "distribution": 0.60,
+              "transition": "End_Encounter"
+            }
+          ]
+        }
+      ]
+    },
+    "Record_Inappropriate_Antibiotic_Pharyngitis": {
+      "type": "Observation",
+      "category": "survey",
+      "codes": [
+        {
+          "system": "SNOMED-CT",
+          "code": "428119001",
+          "display": "Procedure not indicated (situation)"
+        }
+      ],
+      "unit": "{nominal}",
+      "value_code": {
+        "system": "SNOMED-CT",
+        "code": "281789004",
+        "display": "Antibiotic therapy (procedure)"
+      },
+      "remarks": [
+        "VALUE-ENGINE: Records that antibiotics were prescribed despite no bacterial indication"
+      ],
+      "direct_transition": "Prescribe_Antibiotics"
     },
     "Prescribe_Antibiotics": {
       "type": "Simple",

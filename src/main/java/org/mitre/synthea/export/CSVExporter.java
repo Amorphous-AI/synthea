@@ -280,14 +280,16 @@ public class CSVExporter {
         QualityOfLifeModule.QOLS };
     String unit = null;
     for (String score : gbdMetrics) {
+      @SuppressWarnings("unchecked")
+      Map<Integer, Double> scores = (Map<Integer, Double>) person.attributes.get(score);
+      if (scores == null) {
+        continue;
+      }
       if (score.equals(QualityOfLifeModule.QOLS)) {
         unit = "{score}";
       } else {
-        // years in UCUM is "a" for Latin "Annus"
         unit = "a";
       }
-      @SuppressWarnings("unchecked")
-      Map<Integer, Double> scores = (Map<Integer, Double>) person.attributes.get(score);
       for (Integer year : scores.keySet()) {
         birthDay.set(Calendar.YEAR, year);
         if (birthDay.after(cutOff) && birthDay.before(now)) {

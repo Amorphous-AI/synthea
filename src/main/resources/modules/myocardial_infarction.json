@@ -43,6 +43,11 @@
     },
     "End_Encounter": {
       "type": "EncounterEnd",
+      "direct_transition": "Call_Cardiac_Rehab"
+    },
+    "Call_Cardiac_Rehab": {
+      "type": "CallSubmodule",
+      "submodule": "heart/cardiac_rehab",
       "direct_transition": "Chance_of_Recurrent_MI"
     },
     "Death": {
@@ -127,6 +132,91 @@
           "display": "Discharge care plan (record artifact)"
         }
       ],
+      "direct_transition": "Check_Rehab_Referral"
+    },
+    "Check_Rehab_Referral": {
+      "type": "Simple",
+      "complex_transition": [
+        {
+          "condition": {
+            "condition_type": "Attribute",
+            "attribute": "clinician_rehab_referral_propensity",
+            "operator": ">=",
+            "value": 0.6
+          },
+          "distributions": [
+            { "transition": "Set_Rehab_Referred", "distribution": 0.85 },
+            { "transition": "No_Rehab_Referral", "distribution": 0.15 }
+          ]
+        },
+        {
+          "condition": {
+            "condition_type": "Attribute",
+            "attribute": "clinician_rehab_referral_propensity",
+            "operator": ">=",
+            "value": 0.4
+          },
+          "distributions": [
+            { "transition": "Set_Rehab_Referred", "distribution": 0.65 },
+            { "transition": "No_Rehab_Referral", "distribution": 0.35 }
+          ]
+        },
+        {
+          "condition": {
+            "condition_type": "Attribute",
+            "attribute": "clinician_rehab_referral_propensity",
+            "operator": ">=",
+            "value": 0.2
+          },
+          "distributions": [
+            { "transition": "Set_Rehab_Referred", "distribution": 0.4 },
+            { "transition": "No_Rehab_Referral", "distribution": 0.6 }
+          ]
+        },
+        {
+          "distributions": [
+            { "transition": "Set_Rehab_Referred", "distribution": 0.2 },
+            { "transition": "No_Rehab_Referral", "distribution": 0.8 }
+          ]
+        }
+      ]
+    },
+    "Set_Rehab_Referred": {
+      "type": "SetAttribute",
+      "attribute": "cardiac_rehab_referred",
+      "value": true,
+      "direct_transition": "Refer_To_Cardiac_Rehab"
+    },
+    "Refer_To_Cardiac_Rehab": {
+      "type": "Procedure",
+      "codes": [
+        {
+          "system": "SNOMED-CT",
+          "code": "306353006",
+          "display": "Referral to cardiac rehabilitation service"
+        }
+      ],
+      "duration": {
+        "low": 5,
+        "high": 10,
+        "unit": "minutes"
+      },
+      "direct_transition": "End_MI_Onset"
+    },
+    "No_Rehab_Referral": {
+      "type": "Observation",
+      "category": "survey",
+      "unit": "{nominal}",
+      "codes": [
+        {
+          "system": "SNOMED-CT",
+          "code": "428119001",
+          "display": "Cardiac rehabilitation not done (situation)"
+        }
+      ],
+      "exact": {
+        "quantity": 1
+      },
       "direct_transition": "End_MI_Onset"
     },
     "Chance_of_Recurrent_MI": {
@@ -210,6 +300,168 @@
     "Discharge_Medications": {
       "type": "CallSubmodule",
       "submodule": "heart/acs_discharge_meds",
+      "direct_transition": "Statin_Discharge_Decision"
+    },
+    "Statin_Discharge_Decision": {
+      "type": "Simple",
+      "remarks": [
+        "VALUE-ENGINE UC7: Post-MI statin prescribing at discharge.",
+        "Guidelines recommend high-intensity statin (atorvastatin 40-80mg or",
+        "rosuvastatin 20-40mg) for all MI patients at discharge.",
+        "Clinician propensity determines intensity and whether statin is prescribed."
+      ],
+      "complex_transition": [
+        {
+          "condition": {
+            "condition_type": "Attribute",
+            "attribute": "clinician_statin_prescribing_propensity",
+            "operator": ">=",
+            "value": 0.70
+          },
+          "distributions": [
+            {
+              "distribution": 0.85,
+              "transition": "Prescribe_High_Intensity_Statin"
+            },
+            {
+              "distribution": 0.12,
+              "transition": "Prescribe_Moderate_Intensity_Statin"
+            },
+            {
+              "distribution": 0.03,
+              "transition": "No_Statin_Prescribed"
+            }
+          ]
+        },
+        {
+          "condition": {
+            "condition_type": "Attribute",
+            "attribute": "clinician_statin_prescribing_propensity",
+            "operator": ">=",
+            "value": 0.50
+          },
+          "distributions": [
+            {
+              "distribution": 0.50,
+              "transition": "Prescribe_High_Intensity_Statin"
+            },
+            {
+              "distribution": 0.35,
+              "transition": "Prescribe_Moderate_Intensity_Statin"
+            },
+            {
+              "distribution": 0.15,
+              "transition": "No_Statin_Prescribed"
+            }
+          ]
+        },
+        {
+          "condition": {
+            "condition_type": "Attribute",
+            "attribute": "clinician_statin_prescribing_propensity",
+            "operator": ">=",
+            "value": 0.35
+          },
+          "distributions": [
+            {
+              "distribution": 0.25,
+              "transition": "Prescribe_High_Intensity_Statin"
+            },
+            {
+              "distribution": 0.40,
+              "transition": "Prescribe_Moderate_Intensity_Statin"
+            },
+            {
+              "distribution": 0.35,
+              "transition": "No_Statin_Prescribed"
+            }
+          ]
+        },
+        {
+          "distributions": [
+            {
+              "distribution": 0.10,
+              "transition": "Prescribe_High_Intensity_Statin"
+            },
+            {
+              "distribution": 0.30,
+              "transition": "Prescribe_Moderate_Intensity_Statin"
+            },
+            {
+              "distribution": 0.60,
+              "transition": "No_Statin_Prescribed"
+            }
+          ]
+        }
+      ]
+    },
+    "Prescribe_High_Intensity_Statin": {
+      "type": "MedicationOrder",
+      "assign_to_attribute": "statin",
+      "reason": "MI_Onset",
+      "codes": [
+        {
+          "system": "RxNorm",
+          "code": "259255",
+          "display": "atorvastatin 80 MG Oral Tablet"
+        }
+      ],
+      "direct_transition": "Discharge_Care_Plan"
+    },
+    "Prescribe_Moderate_Intensity_Statin": {
+      "type": "MedicationOrder",
+      "assign_to_attribute": "statin",
+      "reason": "MI_Onset",
+      "remarks": [
+        "VALUE-ENGINE: Moderate-intensity statin at MI discharge is suboptimal.",
+        "Guidelines recommend high-intensity for all MI patients."
+      ],
+      "codes": [
+        {
+          "system": "RxNorm",
+          "code": "617310",
+          "display": "atorvastatin 20 MG Oral Tablet"
+        }
+      ],
+      "direct_transition": "Record_Suboptimal_Statin"
+    },
+    "Record_Suboptimal_Statin": {
+      "type": "Observation",
+      "category": "survey",
+      "codes": [
+        {
+          "system": "SNOMED-CT",
+          "code": "428119001",
+          "display": "Procedure not indicated (situation)"
+        }
+      ],
+      "unit": "{nominal}",
+      "value_code": {
+        "system": "SNOMED-CT",
+        "code": "372912004",
+        "display": "Substance with 3-hydroxy-3-methylglutaryl-coenzyme A reductase inhibitor mechanism of action (substance)"
+      },
+      "direct_transition": "Discharge_Care_Plan"
+    },
+    "No_Statin_Prescribed": {
+      "type": "Observation",
+      "category": "survey",
+      "remarks": [
+        "VALUE-ENGINE: No statin prescribed at MI discharge — care gap."
+      ],
+      "codes": [
+        {
+          "system": "SNOMED-CT",
+          "code": "428119001",
+          "display": "Procedure not indicated (situation)"
+        }
+      ],
+      "unit": "{nominal}",
+      "value_code": {
+        "system": "SNOMED-CT",
+        "code": "372912004",
+        "display": "Substance with 3-hydroxy-3-methylglutaryl-coenzyme A reductase inhibitor mechanism of action (substance)"
+      },
       "direct_transition": "Discharge_Care_Plan"
     },
     "Reset_CABG_Referral_Flag": {

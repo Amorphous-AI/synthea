@@ -122,9 +122,9 @@ public final class EncounterModule extends Module {
       return true;
     }
     if (person.hasCurrentEncounter()) {
-      // Don't start a new encounter here if there is already an active encounter
       return false;
     }
+
     boolean startedEncounter = false;
     Encounter encounter = null;
 
@@ -219,17 +219,18 @@ public final class EncounterModule extends Module {
       encounter.codes.add(code);
     }
     // assign a provider organization
-    Provider prov = null;
-    if (specialty.equalsIgnoreCase(ClinicianSpecialty.CARDIOLOGY)) {
-      // Get the first provider in the list that was loaded
-      prov = Provider.getProviderList().get(0);
-    } else {
-      prov = person.getProvider(type, time);
-    }
+    Provider prov = person.getProvider(type, time);
     prov.incrementEncounters(type, year);
     encounter.provider = prov;
     // assign a clinician
     encounter.clinician = prov.chooseClinicianList(specialty, person);
+    // copy clinician practice attributes to patient so JSON modules can reference them
+    if (encounter.clinician != null) {
+      for (Map.Entry<String, Double> entry
+          : encounter.clinician.getPracticeAttributes().entrySet()) {
+        person.attributes.put("clinician_" + entry.getKey(), entry.getValue());
+      }
+    }
     return encounter;
   }
 

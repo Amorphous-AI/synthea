@@ -537,6 +537,214 @@
     "check CKD": {
       "type": "CallSubmodule",
       "submodule": "metabolic_syndrome/kidney_conditions",
+      "direct_transition": "CKD_Screening_Check"
+    },
+    "CKD_Screening_Check": {
+      "type": "Simple",
+      "remarks": [
+        "VALUE-ENGINE UC5: Annual CKD screening for diabetic patients.",
+        "Guidelines recommend both eGFR and uACR annually for all diabetes patients.",
+        "Screening propensity determines whether the clinician orders these tests."
+      ],
+      "conditional_transition": [
+        {
+          "condition": {
+            "condition_type": "Attribute",
+            "attribute": "diabetes",
+            "operator": "is not nil"
+          },
+          "transition": "CKD_Screening_Propensity_Decision"
+        },
+        {
+          "transition": "Check_Diabetes"
+        }
+      ]
+    },
+    "CKD_Screening_Propensity_Decision": {
+      "type": "Simple",
+      "remarks": [
+        "VALUE-ENGINE: High-propensity clinicians order both eGFR and uACR;",
+        "medium order only eGFR (missing uACR); low skip both."
+      ],
+      "complex_transition": [
+        {
+          "condition": {
+            "condition_type": "Attribute",
+            "attribute": "clinician_ckd_screening_propensity",
+            "operator": ">=",
+            "value": 0.60
+          },
+          "distributions": [
+            {
+              "distribution": 0.85,
+              "transition": "Order_Full_CKD_Screen"
+            },
+            {
+              "distribution": 0.10,
+              "transition": "Order_eGFR_Only"
+            },
+            {
+              "distribution": 0.05,
+              "transition": "Record_CKD_Screening_Gap"
+            }
+          ]
+        },
+        {
+          "condition": {
+            "condition_type": "Attribute",
+            "attribute": "clinician_ckd_screening_propensity",
+            "operator": ">=",
+            "value": 0.40
+          },
+          "distributions": [
+            {
+              "distribution": 0.45,
+              "transition": "Order_Full_CKD_Screen"
+            },
+            {
+              "distribution": 0.30,
+              "transition": "Order_eGFR_Only"
+            },
+            {
+              "distribution": 0.25,
+              "transition": "Record_CKD_Screening_Gap"
+            }
+          ]
+        },
+        {
+          "distributions": [
+            {
+              "distribution": 0.15,
+              "transition": "Order_Full_CKD_Screen"
+            },
+            {
+              "distribution": 0.25,
+              "transition": "Order_eGFR_Only"
+            },
+            {
+              "distribution": 0.60,
+              "transition": "Record_CKD_Screening_Gap"
+            }
+          ]
+        }
+      ]
+    },
+    "Order_Full_CKD_Screen": {
+      "type": "DiagnosticReport",
+      "codes": [
+        {
+          "system": "LOINC",
+          "code": "24321-2",
+          "display": "Basic metabolic 2000 panel - Serum or Plasma"
+        }
+      ],
+      "observations": [
+        {
+          "category": "laboratory",
+          "unit": "mL/min/{1.73_m2}",
+          "codes": [
+            {
+              "system": "LOINC",
+              "code": "33914-3",
+              "display": "Glomerular filtration rate/1.73 sq M.predicted [Volume Rate/Area] in Serum, Plasma or Blood by Creatinine-based formula"
+            }
+          ],
+          "range": {
+            "low": 60,
+            "high": 120
+          }
+        }
+      ],
+      "direct_transition": "Order_uACR"
+    },
+    "Order_uACR": {
+      "type": "Observation",
+      "category": "laboratory",
+      "codes": [
+        {
+          "system": "LOINC",
+          "code": "14959-1",
+          "display": "Microalbumin/Creatinine [Mass Ratio] in Urine"
+        }
+      ],
+      "unit": "mg/g",
+      "range": {
+        "low": 0,
+        "high": 40
+      },
+      "direct_transition": "Check_Diabetes"
+    },
+    "Order_eGFR_Only": {
+      "type": "DiagnosticReport",
+      "remarks": [
+        "VALUE-ENGINE: Clinician ordered eGFR but missed uACR — partial screening."
+      ],
+      "codes": [
+        {
+          "system": "LOINC",
+          "code": "24321-2",
+          "display": "Basic metabolic 2000 panel - Serum or Plasma"
+        }
+      ],
+      "observations": [
+        {
+          "category": "laboratory",
+          "unit": "mL/min/{1.73_m2}",
+          "codes": [
+            {
+              "system": "LOINC",
+              "code": "33914-3",
+              "display": "Glomerular filtration rate/1.73 sq M.predicted [Volume Rate/Area] in Serum, Plasma or Blood by Creatinine-based formula"
+            }
+          ],
+          "range": {
+            "low": 60,
+            "high": 120
+          }
+        }
+      ],
+      "direct_transition": "Record_Partial_CKD_Screening_Gap"
+    },
+    "Record_Partial_CKD_Screening_Gap": {
+      "type": "Observation",
+      "category": "survey",
+      "codes": [
+        {
+          "system": "SNOMED-CT",
+          "code": "428119001",
+          "display": "Procedure not indicated (situation)"
+        }
+      ],
+      "unit": "{nominal}",
+      "value_code": {
+        "system": "SNOMED-CT",
+        "code": "443915002",
+        "display": "Annual screening for kidney disease (procedure)"
+      },
+      "remarks": [
+        "VALUE-ENGINE: eGFR was ordered but uACR was missed"
+      ],
+      "direct_transition": "Check_Diabetes"
+    },
+    "Record_CKD_Screening_Gap": {
+      "type": "Observation",
+      "category": "survey",
+      "remarks": [
+        "VALUE-ENGINE: Both eGFR and uACR screening were missed for this diabetic patient."
+      ],
+      "codes": [
+        {
+          "system": "SNOMED-CT",
+          "code": "428119001",
+          "display": "Procedure not indicated (situation)"
+        }
+      ],
+      "unit": "{nominal}",
+      "value_code": {
+        "system": "SNOMED-CT",
+        "code": "443915002",
+        "display": "Annual screening for kidney disease (procedure)"
+      },
       "direct_transition": "Check_Diabetes"
     },
     "Check_Neuropathy": {

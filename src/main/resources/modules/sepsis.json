@@ -120,8 +120,25 @@
         "high": 30,
         "unit": "minutes"
       },
-      "direct_transition": "Check_Septic_Shock",
+      "direct_transition": "End_ED_Encounter",
       "reason": "Sepsis"
+    },
+    "End_ED_Encounter": {
+      "type": "EncounterEnd",
+      "direct_transition": "Inpatient_Admission_Encounter"
+    },
+    "Inpatient_Admission_Encounter": {
+      "type": "Encounter",
+      "encounter_class": "inpatient",
+      "reason": "Sepsis",
+      "codes": [
+        {
+          "system": "SNOMED-CT",
+          "code": "32485007",
+          "display": "Hospital admission (procedure)"
+        }
+      ],
+      "direct_transition": "Check_Septic_Shock"
     },
     "Lactate_Level": {
       "type": "Observation",

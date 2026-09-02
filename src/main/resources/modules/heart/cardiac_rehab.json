@@ -1,0 +1,302 @@
+{
+  "name": "Cardiac Rehabilitation",
+  "specialty": "CARDIOVASCULAR DISEASE (CARDIOLOGY)",
+  "remarks": [
+    "This submodule models the cardiac rehabilitation pathway after an acute cardiac event.",
+    "It is called by other modules (MI, CABG) and should not run standalone.",
+    "Patients are referred, triaged for enrollment, and progress through 12 supervised exercise sessions over approximately 8 weeks.",
+    "Approximately 35% of referred patients do not enroll, and there is a 5% dropout rate per session."
+  ],
+  "states": {
+    "Initial": {
+      "type": "Initial",
+      "conditional_transition": [
+        {
+          "condition": {
+            "condition_type": "Attribute",
+            "attribute": "cardiac_rehab_referred",
+            "operator": "==",
+            "value": true
+          },
+          "transition": "Referral Delay"
+        },
+        {
+          "transition": "Terminal"
+        }
+      ]
+    },
+
+    "Referral Delay": {
+      "type": "Delay",
+      "range": {
+        "low": 2,
+        "high": 6,
+        "unit": "weeks"
+      },
+      "direct_transition": "Check Enrollment"
+    },
+
+    "Check Enrollment": {
+      "type": "Simple",
+      "distributed_transition": [
+        {
+          "distribution": 0.65,
+          "transition": "Intake Encounter"
+        },
+        {
+          "distribution": 0.35,
+          "transition": "Non Attendance Encounter"
+        }
+      ]
+    },
+
+    "Non Attendance Encounter": {
+      "type": "Encounter",
+      "encounter_class": "ambulatory",
+      "codes": [
+        {
+          "system": "SNOMED-CT",
+          "code": "390893007",
+          "display": "Cardiac rehabilitation (regime/therapy)"
+        }
+      ],
+      "direct_transition": "Non Compliance Observation"
+    },
+
+    "Non Compliance Observation": {
+      "type": "Observation",
+      "category": "survey",
+      "unit": "{code}",
+      "codes": [
+        {
+          "system": "SNOMED-CT",
+          "code": "702566000",
+          "display": "Suspected non-compliance of drug therapy"
+        }
+      ],
+      "value_code": {
+        "system": "SNOMED-CT",
+        "code": "702566000",
+        "display": "Suspected non-compliance of drug therapy"
+      },
+      "direct_transition": "End Non Attendance Encounter"
+    },
+
+    "End Non Attendance Encounter": {
+      "type": "EncounterEnd",
+      "direct_transition": "Terminal"
+    },
+
+    "Intake Encounter": {
+      "type": "Encounter",
+      "encounter_class": "ambulatory",
+      "codes": [
+        {
+          "system": "SNOMED-CT",
+          "code": "390893007",
+          "display": "Cardiac rehabilitation (regime/therapy)"
+        }
+      ],
+      "direct_transition": "Intake Assessment"
+    },
+
+    "Intake Assessment": {
+      "type": "Procedure",
+      "codes": [
+        {
+          "system": "SNOMED-CT",
+          "code": "427616002",
+          "display": "Assessment using 6 minute walk test (procedure)"
+        }
+      ],
+      "duration": {
+        "low": 15,
+        "high": 30,
+        "unit": "minutes"
+      },
+      "direct_transition": "End Intake Encounter"
+    },
+
+    "End Intake Encounter": {
+      "type": "EncounterEnd",
+      "direct_transition": "Initialize Session Counter"
+    },
+
+    "Initialize Session Counter": {
+      "type": "SetAttribute",
+      "attribute": "rehab_sessions_completed",
+      "value": 0,
+      "direct_transition": "Session Delay"
+    },
+
+    "Session Delay": {
+      "type": "Delay",
+      "range": {
+        "low": 3,
+        "high": 7,
+        "unit": "days"
+      },
+      "direct_transition": "Check Dropout"
+    },
+
+    "Check Dropout": {
+      "type": "Simple",
+      "distributed_transition": [
+        {
+          "distribution": 0.05,
+          "transition": "Dropout Encounter"
+        },
+        {
+          "distribution": 0.95,
+          "transition": "Session Encounter"
+        }
+      ]
+    },
+
+    "Dropout Encounter": {
+      "type": "Encounter",
+      "encounter_class": "ambulatory",
+      "codes": [
+        {
+          "system": "SNOMED-CT",
+          "code": "390893007",
+          "display": "Cardiac rehabilitation (regime/therapy)"
+        }
+      ],
+      "direct_transition": "Dropout Observation"
+    },
+
+    "Dropout Observation": {
+      "type": "Observation",
+      "category": "survey",
+      "unit": "{code}",
+      "codes": [
+        {
+          "system": "SNOMED-CT",
+          "code": "702566000",
+          "display": "Suspected non-compliance of drug therapy"
+        }
+      ],
+      "value_code": {
+        "system": "SNOMED-CT",
+        "code": "702566000",
+        "display": "Suspected non-compliance of drug therapy"
+      },
+      "direct_transition": "End Dropout Encounter"
+    },
+
+    "End Dropout Encounter": {
+      "type": "EncounterEnd",
+      "direct_transition": "Terminal"
+    },
+
+    "Session Encounter": {
+      "type": "Encounter",
+      "encounter_class": "ambulatory",
+      "codes": [
+        {
+          "system": "SNOMED-CT",
+          "code": "390893007",
+          "display": "Cardiac rehabilitation (regime/therapy)"
+        }
+      ],
+      "direct_transition": "Exercise Therapy"
+    },
+
+    "Exercise Therapy": {
+      "type": "Procedure",
+      "codes": [
+        {
+          "system": "SNOMED-CT",
+          "code": "229065009",
+          "display": "Exercise therapy (regime/therapy)"
+        }
+      ],
+      "duration": {
+        "low": 45,
+        "high": 90,
+        "unit": "minutes"
+      },
+      "direct_transition": "End Session Encounter"
+    },
+
+    "End Session Encounter": {
+      "type": "EncounterEnd",
+      "direct_transition": "Increment Session Counter"
+    },
+
+    "Increment Session Counter": {
+      "type": "Counter",
+      "attribute": "rehab_sessions_completed",
+      "action": "increment",
+      "direct_transition": "Check Sessions Complete"
+    },
+
+    "Check Sessions Complete": {
+      "type": "Simple",
+      "conditional_transition": [
+        {
+          "condition": {
+            "condition_type": "Attribute",
+            "attribute": "rehab_sessions_completed",
+            "operator": ">=",
+            "value": 12
+          },
+          "transition": "Set Rehab Completed"
+        },
+        {
+          "transition": "Session Delay"
+        }
+      ]
+    },
+
+    "Set Rehab Completed": {
+      "type": "SetAttribute",
+      "attribute": "cardiac_rehab_completed",
+      "value": true,
+      "direct_transition": "Completion Encounter"
+    },
+
+    "Completion Encounter": {
+      "type": "Encounter",
+      "encounter_class": "ambulatory",
+      "codes": [
+        {
+          "system": "SNOMED-CT",
+          "code": "390893007",
+          "display": "Cardiac rehabilitation (regime/therapy)"
+        }
+      ],
+      "direct_transition": "Completion Observation"
+    },
+
+    "Completion Observation": {
+      "type": "Observation",
+      "category": "survey",
+      "unit": "{code}",
+      "codes": [
+        {
+          "system": "SNOMED-CT",
+          "code": "390893007",
+          "display": "Cardiac rehabilitation (regime/therapy)"
+        }
+      ],
+      "value_code": {
+        "system": "SNOMED-CT",
+        "code": "182992009",
+        "display": "Treatment completed (finding)"
+      },
+      "direct_transition": "End Completion Encounter"
+    },
+
+    "End Completion Encounter": {
+      "type": "EncounterEnd",
+      "direct_transition": "Terminal"
+    },
+
+    "Terminal": {
+      "type": "Terminal"
+    }
+  },
+  "gmf_version": 2
+}

@@ -607,7 +607,10 @@ public class Provider implements QuadTreeElement, Serializable {
 
         String emergency = row.remove("emergency");
         if ("Yes".equalsIgnoreCase(emergency) || "true".equalsIgnoreCase(emergency)) {
-          parsed.servicesProvided.add(EncounterType.EMERGENCY);
+          if (providerType == ProviderType.HOSPITAL || providerType == ProviderType.IHS
+              || providerType == ProviderType.VETERAN) {
+            parsed.servicesProvided.add(EncounterType.EMERGENCY);
+          }
         }
 
         // add any remaining columns we didn't explicitly map to first-class fields
@@ -728,6 +731,7 @@ public class Provider implements QuadTreeElement, Serializable {
       String ssn = "999-" + ((doc.randInt(99 - 10 + 1) + 10)) + "-"
           + ((doc.randInt(9999 - 1000 + 1) + 1000));
       clinician.attributes.put(Person.IDENTIFIER_SSN, ssn);
+      clinician.initializePracticeAttributes(doc);
     } catch (Throwable e) {
       e.printStackTrace();
       throw e;
