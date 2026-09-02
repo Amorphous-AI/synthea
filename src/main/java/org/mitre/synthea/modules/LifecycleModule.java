@@ -10,6 +10,7 @@ import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 import org.mitre.synthea.engine.Module;
+import org.mitre.synthea.export.rif.identifiers.Passport;
 import org.mitre.synthea.helpers.Attributes;
 import org.mitre.synthea.helpers.Attributes.Inventory;
 import org.mitre.synthea.helpers.Config;
@@ -217,7 +218,7 @@ public final class LifecycleModule extends Module {
     attributes.put(Person.ACTIVE_WEIGHT_MANAGEMENT, false);
     // TODO: Why are the percentiles a vital sign? Sounds more like an attribute?
     double heightPercentile = person.rand();
-    PediatricGrowthTrajectory pgt = new PediatricGrowthTrajectory(person.getSeed(), time);
+    PediatricGrowthTrajectory pgt = new PediatricGrowthTrajectory(person.getSeed(), time, gender);
     double weightPercentile = pgt.reverseWeightPercentile(gender, heightPercentile);
     // make the head percentile within 5% of the height percentile
     double headPercentile = heightPercentile + person.rand(0.025, 0.025);
@@ -325,7 +326,8 @@ public final class LifecycleModule extends Module {
         if (person.attributes.get(Person.IDENTIFIER_PASSPORT) == null) {
           Boolean getsPassport = (person.rand() < 0.5);
           if (getsPassport) {
-            String identifierPassport = "X" + (person.randInt(99999999 - 10000000 + 1) + "X");
+            int randomValue = person.randInt((int) Passport.MAX_PASSPORT + 1);
+            String identifierPassport = new Passport(randomValue).toString();
             person.attributes.put(Person.IDENTIFIER_PASSPORT, identifierPassport);
           }
         }
