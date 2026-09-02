@@ -146,19 +146,30 @@ loadScripts(document, 'script');</script>
 <div class="block">Code for an emergency room admission.</div>
 </div>
 <div class="col-first even-row-color"><code>static final <a href="../world/concepts/HealthRecord.Code.html" title="class in org.mitre.synthea.world.concepts">HealthRecord.Code</a></code></div>
-<div class="col-second even-row-color"><code><a href="#ENCOUNTER_URGENTCARE" class="member-name-link">ENCOUNTER_URGENTCARE</a></code></div>
+<div class="col-second even-row-color"><code><a href="#ENCOUNTER_PROBLEM" class="member-name-link">ENCOUNTER_PROBLEM</a></code></div>
 <div class="col-last even-row-color">
-<div class="block">Code for an urgent care clinic visit.</div>
+<div class="block">Code for a problem-driven visit (used when wellness is converted to a diagnosis).</div>
 </div>
 <div class="col-first odd-row-color"><code>static final <a href="../world/concepts/HealthRecord.Code.html" title="class in org.mitre.synthea.world.concepts">HealthRecord.Code</a></code></div>
-<div class="col-second odd-row-color"><code><a href="#GENERAL_EXAM" class="member-name-link">GENERAL_EXAM</a></code></div>
+<div class="col-second odd-row-color"><code><a href="#ENCOUNTER_URGENTCARE" class="member-name-link">ENCOUNTER_URGENTCARE</a></code></div>
 <div class="col-last odd-row-color">
+<div class="block">Code for an urgent care clinic visit.</div>
+</div>
+<div class="col-first even-row-color"><code>static final <a href="../world/concepts/HealthRecord.Code.html" title="class in org.mitre.synthea.world.concepts">HealthRecord.Code</a></code></div>
+<div class="col-second even-row-color"><code><a href="#GENERAL_EXAM" class="member-name-link">GENERAL_EXAM</a></code></div>
+<div class="col-last even-row-color">
 <div class="block">Code for a general examination.</div>
 </div>
-<div class="col-first even-row-color"><code>static final <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a></code></div>
-<div class="col-second even-row-color"><code><a href="#LAST_VISIT_SYMPTOM_TOTAL" class="member-name-link">LAST_VISIT_SYMPTOM_TOTAL</a></code></div>
-<div class="col-last even-row-color">
+<div class="col-first odd-row-color"><code>static final <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a></code></div>
+<div class="col-second odd-row-color"><code><a href="#LAST_VISIT_SYMPTOM_TOTAL" class="member-name-link">LAST_VISIT_SYMPTOM_TOTAL</a></code></div>
+<div class="col-last odd-row-color">
 <div class="block">Attribute key for the last visit symptom total.</div>
+</div>
+<div class="col-first even-row-color"><code>static final <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a></code></div>
+<div class="col-second even-row-color"><code><a href="#LAST_WELLNESS_WINDOW" class="member-name-link">LAST_WELLNESS_WINDOW</a></code></div>
+<div class="col-last even-row-color">
+<div class="block">Last time a wellness <em>window</em> opened when scheduled wellness
+ encounters are disabled.</div>
 </div>
 <div class="col-first odd-row-color"><code>static final <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a></code></div>
 <div class="col-second odd-row-color"><code><a href="#NAME" class="member-name-link">NAME</a></code></div>
@@ -245,24 +256,41 @@ loadScripts(document, 'script');</script>
 <div class="col-last even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">
 <div class="block">Get the correct Wellness Visit Code by age of patient.</div>
 </div>
-<div class="col-first odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code>static void</code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code><a href="#inventoryAttributes(java.util.Map)" class="member-name-link">inventoryAttributes</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/util/Map.html" title="class or interface in java.util" class="external-link">Map</a>&lt;<a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>,<wbr><a href="../helpers/Attributes.Inventory.html" title="class in org.mitre.synthea.helpers">Attributes.Inventory</a>&gt;&nbsp;attributes)</code></div>
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code>static boolean</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code><a href="#immunizationsDisabled()" class="member-name-link">immunizationsDisabled</a>()</code></div>
 <div class="col-last odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">
+<div class="block">Whether encounter-driven immunizations are disabled.</div>
+</div>
+<div class="col-first even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code>static void</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code><a href="#inventoryAttributes(java.util.Map)" class="member-name-link">inventoryAttributes</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/util/Map.html" title="class or interface in java.util" class="external-link">Map</a>&lt;<a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>,<wbr><a href="../helpers/Attributes.Inventory.html" title="class in org.mitre.synthea.helpers">Attributes.Inventory</a>&gt;&nbsp;attributes)</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">
 <div class="block">Populate the given attribute map with the list of attributes that this
  module reads/writes with example values when appropriate.</div>
 </div>
-<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>boolean</code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#process(org.mitre.synthea.world.agents.Person,long)" class="member-name-link">process</a><wbr>(<a href="../world/agents/Person.html" title="class in org.mitre.synthea.world.agents">Person</a>&nbsp;person,
- long&nbsp;time)</code></div>
-<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
-<div class="block">Process this Module with the given Person at the specified time within the simulation.</div>
-</div>
-<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>long</code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#recommendedTimeBetweenWellnessVisits(org.mitre.synthea.world.agents.Person,long)" class="member-name-link">recommendedTimeBetweenWellnessVisits</a><wbr>(<a href="../world/agents/Person.html" title="class in org.mitre.synthea.world.agents">Person</a>&nbsp;person,
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>boolean</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#process(org.mitre.synthea.world.agents.Person,long)" class="member-name-link">process</a><wbr>(<a href="../world/agents/Person.html" title="class in org.mitre.synthea.world.agents">Person</a>&nbsp;person,
  long&nbsp;time)</code></div>
 <div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="block">Process this Module with the given Person at the specified time within the simulation.</div>
+</div>
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>long</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#recommendedTimeBetweenWellnessVisits(org.mitre.synthea.world.agents.Person,long)" class="member-name-link">recommendedTimeBetweenWellnessVisits</a><wbr>(<a href="../world/agents/Person.html" title="class in org.mitre.synthea.world.agents">Person</a>&nbsp;person,
+ long&nbsp;time)</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Recommended time between Wellness Visits by age of patient and whether
  they have chronic medications.</div>
+</div>
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code>static boolean</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code><a href="#wellnessEncountersDisabled()" class="member-name-link">wellnessEncountersDisabled</a>()</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">
+<div class="block">Whether scheduled wellness / well-child / general-exam encounters are
+ disabled.</div>
+</div>
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>boolean</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#wellnessWindowDue(org.mitre.synthea.world.agents.Person,long)" class="member-name-link">wellnessWindowDue</a><wbr>(<a href="../world/agents/Person.html" title="class in org.mitre.synthea.world.agents">Person</a>&nbsp;person,
+ long&nbsp;time)</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="block">Whether a wellness window should open at <code>time</code>.</div>
 </div>
 </div>
 </div>
@@ -410,6 +438,24 @@ loadScripts(document, 'script');</script>
 </section>
 </li>
 <li>
+<section class="detail" id="LAST_WELLNESS_WINDOW">
+<h3>LAST_WELLNESS_WINDOW</h3>
+<div class="member-signature"><span class="modifiers">public static final</span>&nbsp;<span class="return-type"><a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a></span>&nbsp;<span class="element-name">LAST_WELLNESS_WINDOW</span></div>
+<div class="block">Last time a wellness <em>window</em> opened when scheduled wellness
+ encounters are disabled. Disease modules still unblock on this cadence
+ so hypertension / diabetes / etc. can be diagnosed, but no empty
+ checkup is written to the record.</div>
+<dl class="notes">
+<dt>See Also:</dt>
+<dd>
+<ul class="see-list">
+<li><a href="../../../../constant-values.html#org.mitre.synthea.modules.EncounterModule.LAST_WELLNESS_WINDOW">Constant Field Values</a></li>
+</ul>
+</dd>
+</dl>
+</section>
+</li>
+<li>
 <section class="detail" id="ENCOUNTER_CHECKUP">
 <h3>ENCOUNTER_CHECKUP</h3>
 <div class="member-signature"><span class="modifiers">public static final</span>&nbsp;<span class="return-type"><a href="../world/concepts/HealthRecord.Code.html" title="class in org.mitre.synthea.world.concepts">HealthRecord.Code</a></span>&nbsp;<span class="element-name">ENCOUNTER_CHECKUP</span></div>
@@ -444,6 +490,13 @@ loadScripts(document, 'script');</script>
 <div class="block">Code for an urgent care clinic visit.</div>
 </section>
 </li>
+<li>
+<section class="detail" id="ENCOUNTER_PROBLEM">
+<h3>ENCOUNTER_PROBLEM</h3>
+<div class="member-signature"><span class="modifiers">public static final</span>&nbsp;<span class="return-type"><a href="../world/concepts/HealthRecord.Code.html" title="class in org.mitre.synthea.world.concepts">HealthRecord.Code</a></span>&nbsp;<span class="element-name">ENCOUNTER_PROBLEM</span></div>
+<div class="block">Code for a problem-driven visit (used when wellness is converted to a diagnosis).</div>
+</section>
+</li>
 </ul>
 </section>
 </li>
@@ -467,6 +520,22 @@ loadScripts(document, 'script');</script>
 <section class="method-details" id="method-detail">
 <h2>Method Details</h2>
 <ul class="member-list">
+<li>
+<section class="detail" id="wellnessEncountersDisabled()">
+<h3>wellnessEncountersDisabled</h3>
+<div class="member-signature"><span class="modifiers">public static</span>&nbsp;<span class="return-type">boolean</span>&nbsp;<span class="element-name">wellnessEncountersDisabled</span>()</div>
+<div class="block">Whether scheduled wellness / well-child / general-exam encounters are
+ disabled. Used by Canon hospital-lake generation so the record is not
+ flooded with reason-less primary-care checkups.</div>
+</section>
+</li>
+<li>
+<section class="detail" id="immunizationsDisabled()">
+<h3>immunizationsDisabled</h3>
+<div class="member-signature"><span class="modifiers">public static</span>&nbsp;<span class="return-type">boolean</span>&nbsp;<span class="element-name">immunizationsDisabled</span>()</div>
+<div class="block">Whether encounter-driven immunizations are disabled.</div>
+</section>
+</li>
 <li>
 <section class="detail" id="clone()">
 <h3>clone</h3>
@@ -551,6 +620,16 @@ loadScripts(document, 'script');</script>
 <dt>Returns:</dt>
 <dd>Recommended time between Wellness Visits in milliseconds</dd>
 </dl>
+</section>
+</li>
+<li>
+<section class="detail" id="wellnessWindowDue(org.mitre.synthea.world.agents.Person,long)">
+<h3>wellnessWindowDue</h3>
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">boolean</span>&nbsp;<span class="element-name">wellnessWindowDue</span><wbr><span class="parameters">(<a href="../world/agents/Person.html" title="class in org.mitre.synthea.world.agents">Person</a>&nbsp;person,
+ long&nbsp;time)</span></div>
+<div class="block">Whether a wellness window should open at <code>time</code>. Uses the last
+ recorded wellness encounter when those are enabled, otherwise the last
+ virtual window so disabling export does not open a window every timestep.</div>
 </section>
 </li>
 <li>

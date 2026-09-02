@@ -1961,6 +1961,10 @@ loadScripts(document, 'script');</script>
 <dd>
 <div class="block">Code for an emergency room admission.</div>
 </dd>
+<dt><a href="org/mitre/synthea/modules/EncounterModule.html#ENCOUNTER_PROBLEM" class="member-name-link">ENCOUNTER_PROBLEM</a> - Static variable in class org.mitre.synthea.modules.<a href="org/mitre/synthea/modules/EncounterModule.html" title="class in org.mitre.synthea.modules">EncounterModule</a></dt>
+<dd>
+<div class="block">Code for a problem-driven visit (used when wellness is converted to a diagnosis).</div>
+</dd>
 <dt><a href="org/mitre/synthea/modules/EncounterModule.html#ENCOUNTER_URGENTCARE" class="member-name-link">ENCOUNTER_URGENTCARE</a> - Static variable in class org.mitre.synthea.modules.<a href="org/mitre/synthea/modules/EncounterModule.html" title="class in org.mitre.synthea.modules">EncounterModule</a></dt>
 <dd>
 <div class="block">Code for an urgent care clinic visit.</div>
@@ -4308,6 +4312,10 @@ loadScripts(document, 'script');</script>
 <dd>
 <div class="block">Constant representing immunizations in the health record.</div>
 </dd>
+<dt><a href="org/mitre/synthea/modules/EncounterModule.html#immunizationsDisabled()" class="member-name-link">immunizationsDisabled()</a> - Static method in class org.mitre.synthea.modules.<a href="org/mitre/synthea/modules/EncounterModule.html" title="class in org.mitre.synthea.modules">EncounterModule</a></dt>
+<dd>
+<div class="block">Whether encounter-driven immunizations are disabled.</div>
+</dd>
 <dt><a href="org/mitre/synthea/modules/covid/C19VaccineAgeDistributions.AgeRange.html#in(int)" class="member-name-link">in(int)</a> - Method in class org.mitre.synthea.modules.covid.<a href="org/mitre/synthea/modules/covid/C19VaccineAgeDistributions.AgeRange.html" title="class in org.mitre.synthea.modules.covid">C19VaccineAgeDistributions.AgeRange</a></dt>
 <dd>
 <div class="block">Determines whether the specified age falls within this range.</div>
@@ -4831,6 +4839,11 @@ loadScripts(document, 'script');</script>
 <dt><a href="org/mitre/synthea/modules/EncounterModule.html#LAST_VISIT_SYMPTOM_TOTAL" class="member-name-link">LAST_VISIT_SYMPTOM_TOTAL</a> - Static variable in class org.mitre.synthea.modules.<a href="org/mitre/synthea/modules/EncounterModule.html" title="class in org.mitre.synthea.modules">EncounterModule</a></dt>
 <dd>
 <div class="block">Attribute key for the last visit symptom total.</div>
+</dd>
+<dt><a href="org/mitre/synthea/modules/EncounterModule.html#LAST_WELLNESS_WINDOW" class="member-name-link">LAST_WELLNESS_WINDOW</a> - Static variable in class org.mitre.synthea.modules.<a href="org/mitre/synthea/modules/EncounterModule.html" title="class in org.mitre.synthea.modules">EncounterModule</a></dt>
+<dd>
+<div class="block">Last time a wellness <em>window</em> opened when scheduled wellness
+ encounters are disabled.</div>
 </dd>
 <dt><a href="org/mitre/synthea/world/concepts/HealthRecord.html#lastEncounterTime()" class="member-name-link">lastEncounterTime()</a> - Method in class org.mitre.synthea.world.concepts.<a href="org/mitre/synthea/world/concepts/HealthRecord.html" title="class in org.mitre.synthea.world.concepts">HealthRecord</a></dt>
 <dd>
@@ -8633,6 +8646,15 @@ the order they are declared.</div>
 <dt><a href="org/mitre/synthea/world/agents/Clinician.html#WELLNESS" class="member-name-link">WELLNESS</a> - Static variable in class org.mitre.synthea.world.agents.<a href="org/mitre/synthea/world/agents/Clinician.html" title="class in org.mitre.synthea.world.agents">Clinician</a></dt>
 <dd>
 <div class="block">Identifier for wellness services.</div>
+</dd>
+<dt><a href="org/mitre/synthea/modules/EncounterModule.html#wellnessEncountersDisabled()" class="member-name-link">wellnessEncountersDisabled()</a> - Static method in class org.mitre.synthea.modules.<a href="org/mitre/synthea/modules/EncounterModule.html" title="class in org.mitre.synthea.modules">EncounterModule</a></dt>
+<dd>
+<div class="block">Whether scheduled wellness / well-child / general-exam encounters are
+ disabled.</div>
+</dd>
+<dt><a href="org/mitre/synthea/modules/EncounterModule.html#wellnessWindowDue(org.mitre.synthea.world.agents.Person,long)" class="member-name-link">wellnessWindowDue(Person, long)</a> - Method in class org.mitre.synthea.modules.<a href="org/mitre/synthea/modules/EncounterModule.html" title="class in org.mitre.synthea.modules">EncounterModule</a></dt>
+<dd>
+<div class="block">Whether a wellness window should open at <code>time</code>.</div>
 </dd>
 <dt><a href="org/mitre/synthea/engine/Components.Attachment.html#width" class="member-name-link">width</a> - Variable in class org.mitre.synthea.engine.<a href="org/mitre/synthea/engine/Components.Attachment.html" title="class in org.mitre.synthea.engine">Components.Attachment</a></dt>
 <dd>
