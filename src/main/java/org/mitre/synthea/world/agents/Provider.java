@@ -669,10 +669,16 @@ public class Provider implements QuadTreeElement, Serializable {
   private ArrayList<Clinician> generateClinicianList(int numClinicians, String specialty,
       RandomNumberGenerator random) {
     ArrayList<Clinician> clinicians = new ArrayList<Clinician>();
+    // Offset by clinicians already generated for this provider so each
+    // specialty list gets distinct identifiers (and therefore UUIDs).
+    int offset = 0;
+    for (ArrayList<Clinician> existing : clinicianMap.values()) {
+      offset += existing.size();
+    }
     for (int i = 0; i < numClinicians; i++) {
       Clinician clinician = null;
       clinician = generateClinician(random.getSeed(),
-          Long.parseLong(loaded + "" + i), random);
+          Long.parseLong(loaded + "" + (offset + i)), random);
       clinician.attributes.put(Clinician.SPECIALTY, specialty);
       clinicians.add(clinician);
     }
