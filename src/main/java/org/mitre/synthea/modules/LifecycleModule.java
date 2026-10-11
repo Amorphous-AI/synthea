@@ -657,6 +657,13 @@ public final class LifecycleModule extends Module {
     impacts.put("1373463", -0.5); // canagliflozin
     impacts.put("106892", -3.0); // basal insulin
     impacts.put("865098", -6.0); // prandial insulin
+    // Drugs added by the Canon metabolic_syndrome/medications overlay.
+    impacts.put("1545658", -0.6); // empagliflozin 10 MG
+    impacts.put("1488569", -0.6); // dapagliflozin 10 MG
+    impacts.put("2398841", -1.2); // semaglutide pen
+    impacts.put("1551295", -1.0); // dulaglutide 1.5 MG
+    impacts.put("199246", -1.2); // glimepiride 2 MG
+    impacts.put("665033", -0.6); // sitagliptin 100 MG
 
     return impacts;
   }
