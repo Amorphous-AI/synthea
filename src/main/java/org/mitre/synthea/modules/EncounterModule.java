@@ -185,13 +185,10 @@ public final class EncounterModule extends Module {
       encounter.codes.add(code);
     }
     // assign a provider organization
-    Provider prov = null;
-    if (specialty.equalsIgnoreCase(ClinicianSpecialty.CARDIOLOGY)) {
-      // Get the first provider in the list that was loaded
-      prov = Provider.getProviderList().get(0);
-    } else {
-      prov = person.getProvider(type, time);
-    }
+    // Specialty encounters use the person's provider for this encounter type
+    // (upstream sent cardiology to the first loaded provider, often a home
+    // care agency without cardiologists).
+    Provider prov = person.getProvider(type, time);
     prov.incrementEncounters(type, year);
     encounter.provider = prov;
     // assign a clinician

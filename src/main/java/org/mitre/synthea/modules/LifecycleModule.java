@@ -822,6 +822,17 @@ public final class LifecycleModule extends Module {
         }
       }
     }
+    if (diabetes) {
+      // Treated diabetics do not fall below a personal floor; additive drug
+      // impacts otherwise give impossible values (2-3%) and stop the care
+      // loop from ever reviewing well-controlled patients.
+      Double floor = (Double) person.attributes.get("hba1c_treated_floor");
+      if (floor == null) {
+        floor = 5.8 + person.rand(0.0, 0.6);
+        person.attributes.put("hba1c_treated_floor", floor);
+      }
+      hbA1c = Math.max(hbA1c, floor);
+    }
     person.setVitalSign(VitalSign.BLOOD_GLUCOSE, hbA1c);
 
     int oxygenSaturation;
